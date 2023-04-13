@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: Composite
   m_EditorClassIdentifier: 
   Behaviors:
-  - Weight: 1
-    flockBehavior: {fileID: 11400000, guid: e8c28fd4410ab46479b3525a11c3aa1c, type: 2}
-  - Weight: 1
+  - Weight: 4
+    flockBehavior: {fileID: 11400000, guid: 404c7392dec2f734a8f02e1a82c0a082, type: 2}
+  - Weight: 0.5
     flockBehavior: {fileID: 11400000, guid: 550a64dcf0bfe66438007a5dd97a2c7a, type: 2}
   - Weight: 2
     flockBehavior: {fileID: 11400000, guid: 29c259c1b62de50478f7da0f1b507707, type: 2}
+  - Weight: 0.05
+    flockBehavior: {fileID: 11400000, guid: 6328747c4d24ecc4b89500b7032b75f6, type: 2}
+  - Weight: 5
+    flockBehavior: {fileID: 11400000, guid: 4bbbed661f1c267448623455e9a3c5b4, type: 2}

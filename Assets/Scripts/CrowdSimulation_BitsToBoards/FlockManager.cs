@@ -43,6 +43,7 @@ namespace Flocking_BitsToBoard
                     transform
                     );
                 newAgent.name = "Agent_" + i;
+                newAgent.Initialize(this);
                 FlockAgents.Add(newAgent);
             }
         }

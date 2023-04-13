@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9cce87de4c6ff1c4b9a4bd7884c0d0db, type: 3}
-  m_Name: Alignment
+  m_Script: {fileID: 11500000, guid: bcf544bb292b2f64095c8779ec917d42, type: 3}
+  m_Name: StayInRadius
   m_EditorClassIdentifier: 
-  Filter: {fileID: 11400000, guid: 9508259dcc18e61438e93cc421bbae98, type: 2}
+  Center: {x: 0, y: 0}
+  Radius: 20

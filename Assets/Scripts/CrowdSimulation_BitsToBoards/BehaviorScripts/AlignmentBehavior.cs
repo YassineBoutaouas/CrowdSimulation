@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Flocking_BitsToBoard
 {
     [CreateAssetMenu(menuName = "Flock/Behavior/Alignment", fileName = "New Alignment Behavior")]
-    public class AlignmentBehavior : FlockBehavior
+    public class AlignmentBehavior : FilteredFlockBehavior
     {
         public override Vector2 CalculateMove(FlockAgent agent, List<Transform> context, FlockManager flock)
         {
@@ -13,7 +13,8 @@ namespace Flocking_BitsToBoard
                 return agent.transform.up;
 
             Vector2 alignmentPos = Vector2.zero;
-            foreach (Transform t in context)
+            List<Transform> filteredContext = (Filter == null) ? context : Filter.Filter(agent, context);
+            foreach (Transform t in filteredContext)
                 alignmentPos += (Vector2)t.up;
 
             alignmentPos /= context.Count;

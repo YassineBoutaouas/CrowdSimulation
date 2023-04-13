@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Flocking_BitsToBoard
 {
     [CreateAssetMenu(menuName = "Flock/Behavior/Cohesion", fileName = "New Cohesion Behavior")]
-    public class CohesionBehavior : FlockBehavior
+    public class CohesionBehavior : FilteredFlockBehavior
     {
         public override Vector2 CalculateMove(FlockAgent agent, List<Transform> context, FlockManager flock)
         {
@@ -13,7 +13,8 @@ namespace Flocking_BitsToBoard
                 return Vector2.zero;
 
             Vector2 cohesionPos = Vector2.zero;
-            foreach(Transform t in context)
+            List<Transform> filteredContext = (Filter == null) ? context : Filter.Filter(agent, context);
+            foreach (Transform t in filteredContext)
                 cohesionPos += (Vector2)t.position;
 
             cohesionPos /= context.Count;
