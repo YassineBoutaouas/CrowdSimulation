@@ -87,7 +87,7 @@ namespace CrowdSimulation
             _velocity = dir * speed;
 
             _agent.Move(_velocity * Time.deltaTime);
-            _cachedTransform.forward = dir;
+            _cachedTransform.forward = Vector3.Scale(Vector3.right + Vector3.forward, dir);
             Position = _cachedTransform.position;
             Forward = dir;
         }
@@ -105,7 +105,7 @@ namespace CrowdSimulation
             for (int i = 0; i < CollisionHelper.directions.Length; i++)
             {
                 Vector3 dir = CollisionHelper.directions[i] * _cachedTransform.forward;
-                if (!Physics.SphereCast(_cachedTransform.position + Vector3.up, _settings.BoundsRadius, dir, out RaycastHit hit, _settings.CollisionAvoidanceDistance, _settings.ObstacleLayer, QueryTriggerInteraction.Ignore))
+                if (!Physics.SphereCast(_cachedTransform.position + Vector3.up, _settings.BoundsRadius, dir, out RaycastHit _, _settings.CollisionAvoidanceDistance, _settings.ObstacleLayer, QueryTriggerInteraction.Ignore))
                     return dir;
             }
 
