@@ -1,4 +1,3 @@
-using Boids_Lague;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -38,8 +37,7 @@ namespace CrowdSimulation
 
         public void Initialize(FlockSettings settings, Transform target)
         {
-            _target = target;
-            _settings = settings;
+            _target = target; _settings = settings;
 
             Position = _cachedTransform.position;
             Forward = _cachedTransform.forward;
@@ -52,13 +50,13 @@ namespace CrowdSimulation
         {
             Vector3 acceleration = Vector3.zero;
 
-            if(_target != null)
+            if (_target != null)
             {
                 Vector3 offsetToTarget = (_target.position - Position);
                 acceleration = SteerTowards(offsetToTarget) * _settings.TargetWeight;
             }
 
-            if(NumPerceivedFlockmates != 0)
+            if (NumPerceivedFlockmates != 0)
             {
                 CenterOfFlockmates /= NumPerceivedFlockmates;
 
