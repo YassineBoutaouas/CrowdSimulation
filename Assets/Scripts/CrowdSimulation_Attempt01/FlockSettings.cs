@@ -25,5 +25,7 @@ namespace CrowdSimulation
         public LayerMask ObstacleLayer;
         public float BoundsRadius = 0.27f;
         public float CollisionAvoidanceDistance = 5;
+
+        public float MoveToCenterDistance = 10f;
     }
 }  

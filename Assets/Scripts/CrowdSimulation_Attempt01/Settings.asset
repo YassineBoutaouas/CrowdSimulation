@@ -18,8 +18,8 @@ MonoBehaviour:
   AvoidanceRadius: 10
   MaxSteerForce: 5
   AlignWeight: 1
-  CohesionWeight: 1
-  SeperationWeight: 10
+  CohesionWeight: 0.8
+  SeperationWeight: 5
   TargetWeight: 1
   AvoidCollisionWeight: 20
   ObstacleLayer:
@@ -27,3 +27,4 @@ MonoBehaviour:
     m_Bits: 4294967295
   BoundsRadius: 5
   CollisionAvoidanceDistance: 5
+  MoveToCenterDistance: 10

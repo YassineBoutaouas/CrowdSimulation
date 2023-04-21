@@ -5,35 +5,19 @@ namespace CrowdSimulation
 {
     public class Flock : MonoBehaviour
     {
-        public List<FlockAgent> AgentPrefabs = new List<FlockAgent>();
-
-        public float SpawnRadius = 10;
-        public int SpawnCount = 10;
+        public static Flock Instance;
 
         public List<FlockAgent> Agents = new List<FlockAgent>();
 
+        public FlockSettings Settings;
+
         [Space()]
         private const int _threadGroupSize = 1024;
-        public FlockSettings Settings;
-        public Transform Target;
         public ComputeShader shader;
 
         private void Awake()
         {
-            Spawn();
-        }
-
-        public void Spawn()
-        {
-            for (int i = 0; i < SpawnCount; i++)
-            {
-                Vector2 pos = Random.insideUnitCircle * SpawnRadius;
-                FlockAgent agent = Instantiate(AgentPrefabs[Random.Range(0, AgentPrefabs.Count)], new Vector3(transform.position.x + pos.x, transform.position.y, transform.position.z + pos.y), Quaternion.LookRotation(Random.insideUnitCircle, Vector3.up), transform);
-                agent.name = $"Agent_{i}";
-                agent.Initialize(Settings, Target);
-
-                Agents.Add(agent);
-            }
+            Instance = this;
         }
 
         private void Update()
@@ -73,12 +57,6 @@ namespace CrowdSimulation
             }
 
             agentBuffer.Release();
-        }
-
-        private void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(transform.position, SpawnRadius);
         }
     }
 
