@@ -52,7 +52,7 @@ namespace CrowdSimulation
                 Agents[i].CenterOfFlockmates = agentData[i].FlockCenter;
                 Agents[i].AvgAvoidanceHeading = agentData[i].AvoidanceHeading;
                 Agents[i].NumPerceivedFlockmates = agentData[i].NumFlockmates;
-
+                
                 Agents[i].UpdateVelocity();
             }
 

@@ -64,7 +64,7 @@ Material:
     - _CastShadows: 1
     - _Cull: 2
     - _DstBlend: 0
-    - _GridContrast: 1.5
+    - _GridContrast: 5
     - _GridOpacity: 1
     - _GridSpacing: 1
     - _Metallic: 0
@@ -79,5 +79,5 @@ Material:
     - _ZWrite: 1
     - _ZWriteControl: 0
     m_Colors:
-    - _Color: {r: 0.22727543, g: 0.4433962, b: 0.24308641, a: 0}
+    - _Color: {r: 0.24528301, g: 0.24528301, b: 0.24528301, a: 0}
   m_BuildTextureStacks: []

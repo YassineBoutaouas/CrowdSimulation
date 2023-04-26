@@ -11,7 +11,7 @@ PrefabInstance:
     - target: {fileID: 179068006785583416, guid: 58fba89de64da8242b324ebe5a9faa1a,
         type: 3}
       propertyPath: m_Name
-      value: Character
+      value: Character Variant
       objectReference: {fileID: 0}
     - target: {fileID: 179068006785583417, guid: 58fba89de64da8242b324ebe5a9faa1a,
         type: 3}
@@ -68,11 +68,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2398411580537905616, guid: 58fba89de64da8242b324ebe5a9faa1a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2772004695807756086, guid: 58fba89de64da8242b324ebe5a9faa1a,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: ff4cc267000eb954aa358f6e456b5308, type: 2}
+    - target: {fileID: 7283071238569170273, guid: 58fba89de64da8242b324ebe5a9faa1a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

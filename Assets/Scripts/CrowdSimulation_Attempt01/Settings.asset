@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4824191b0ef45d04bbaffe5fcefddad5, type: 3}
   m_Name: Settings
   m_EditorClassIdentifier: 
-  MinSpeed: 2
-  MaxSpeed: 5
+  MinSpeed: 4
+  MaxSpeed: 8
   PerceptionRadius: 2.5
   AvoidanceRadius: 10
   MaxSteerForce: 5
   AlignWeight: 1
-  CohesionWeight: 0.8
-  SeperationWeight: 5
-  TargetWeight: 1
+  CohesionWeight: 1
+  SeperationWeight: 10
+  TargetWeight: 2
   AvoidCollisionWeight: 20
   ObstacleLayer:
     serializedVersion: 2
