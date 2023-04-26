@@ -116,70 +116,6 @@ namespace CrowdSimulation
             _hasReachedTarget = false;
         }
 
-        public void UpdateVelocityForces()
-        {
-            Vector3 acceleration = Vector3.zero;
-
-            if (Target != null)
-            {
-                Vector3 offsetToTarget = (Target.position - Position);
-                acceleration = SteerTowards(offsetToTarget) * _settings.TargetWeight;
-            }
-
-            if (NumPerceivedFlockmates != 0)
-            {
-                CenterOfFlockmates /= NumPerceivedFlockmates;
-
-                Vector3 offsetToFlockMatesCenter = (CenterOfFlockmates - Position);
-
-                var alignmentForce = SteerTowards(AvgFlockHeading) * _settings.AlignWeight;
-                var cohesionForce = SteerTowards(offsetToFlockMatesCenter) * _settings.CohesionWeight;
-                var seperationForce = SteerTowards(AvgAvoidanceHeading) * _settings.SeperationWeight;
-
-                acceleration += alignmentForce;
-                acceleration += cohesionForce;
-                acceleration += seperationForce;
-            }
-
-            if (IsHeadingForCollision())
-            {
-                Vector3 collisionAvoidanceDir = CalculateCollisionAvoidanceDir();
-                Vector3 collisionAvoidanceForce = SteerTowards(collisionAvoidanceDir) * _settings.AvoidCollisionWeight;
-                acceleration += collisionAvoidanceForce;
-            }
-
-            _velocity += acceleration * Time.deltaTime;
-            float speed = _velocity.magnitude;
-            Vector3 dir = _velocity.normalized;
-            speed = Mathf.Clamp(speed, _settings.MinSpeed, _settings.MaxSpeed);
-            _velocity = dir * speed;
-
-            _agent.Move(_velocity * Time.deltaTime);
-            _cachedTransform.forward = Vector3.Scale(Vector3.right + Vector3.forward, dir);
-            Position = _cachedTransform.position;
-            Forward = dir;
-        }
-
-        private bool IsHeadingForCollision()
-        {
-            if (Physics.SphereCast(Position, _settings.BoundsRadius, Forward, out RaycastHit _, _settings.CollisionAvoidanceDistance, _settings.ObstacleLayer, QueryTriggerInteraction.Ignore))
-                return true;
-
-            return false;
-        }
-
-        private Vector3 CalculateCollisionAvoidanceDir()
-        {
-            for (int i = 0; i < CollisionHelper.directions.Length; i++)
-            {
-                Vector3 dir = CollisionHelper.directions[i] * _cachedTransform.forward;
-                if (!Physics.SphereCast(_cachedTransform.position + Vector3.up, _settings.BoundsRadius, dir, out RaycastHit _, _settings.CollisionAvoidanceDistance, _settings.ObstacleLayer, QueryTriggerInteraction.Ignore))
-                    return dir;
-            }
-
-            return Forward;
-        }
-
         private Vector3 SteerTowards(Vector3 vector)
         {
             Vector3 v = vector.normalized * _settings.MaxSpeed - _velocity;
@@ -206,29 +142,6 @@ namespace CrowdSimulation
 
             // Gizmos.color = Color.magenta;
             // Gizmos.DrawSphere(CenterOfFlockmates, 1);
-
-            //Gizmos.color = Color.magenta;
-            //Gizmos.DrawSphere(_pathToTarget.corners[1], 1f);
-        }
-    }
-
-    public static class CollisionHelper
-    {
-        private const int numViewDirections = 10;
-        private const int fieldOfView = 120;
-        public static readonly Quaternion[] directions;
-
-        static CollisionHelper()
-        {
-            directions = new Quaternion[numViewDirections];
-
-            float angleIncrement = fieldOfView / numViewDirections;
-            float fovOffset = -(angleIncrement * numViewDirections / 2);
-            for (int i = 0; i < numViewDirections; i++)
-            {
-                Quaternion angleDirection = Quaternion.AngleAxis(fovOffset + (angleIncrement * i), Vector3.up);
-                directions[i] = angleDirection;
-            }
         }
     }
 }
