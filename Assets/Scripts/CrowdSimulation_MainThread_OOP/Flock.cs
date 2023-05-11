@@ -33,6 +33,7 @@ namespace CrowdSimulation
                 agentData[i].Direction = Agents[i].Forward;
             }
 
+            ///---Agent shader data------------------------------------------------------
             var agentBuffer = new ComputeBuffer(numAgents, AgentData.Size);
             agentBuffer.SetData(agentData);
 
@@ -57,6 +58,7 @@ namespace CrowdSimulation
             }
 
             agentBuffer.Release();
+            ///-------------------------------------------------------------------------
         }
     }
 
