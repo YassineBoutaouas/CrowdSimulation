@@ -3,7 +3,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace CrowdSimulation.Scenarios.Testing
+namespace CrowdSimulation_Base.Scenarios.Testing
 {
     [CustomEditor(typeof(ScenarioTesting), true), CanEditMultipleObjects]
     public class FlockEditor : Editor

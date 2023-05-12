@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CrowdSimulation
+namespace CrowdSimulation_Base
 {
     [CreateAssetMenu(menuName = "Crowd Simulation/Settings")]
     public class FlockSettings : ScriptableObject

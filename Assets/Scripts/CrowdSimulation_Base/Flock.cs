@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CrowdSimulation
+namespace CrowdSimulation_Base
 {
     public class Flock : MonoBehaviour
     {

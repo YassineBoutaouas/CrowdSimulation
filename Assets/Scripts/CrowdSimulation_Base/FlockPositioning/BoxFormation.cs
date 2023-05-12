@@ -4,7 +4,7 @@ using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace CrowdSimulation
+namespace CrowdSimulation_Base
 {
     [System.Serializable]
     public class BoxFormation : FormationBase

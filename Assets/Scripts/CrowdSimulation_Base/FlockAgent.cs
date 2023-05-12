@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace CrowdSimulation
+namespace CrowdSimulation_Base
 {
     [RequireComponent(typeof(NavMeshAgent))]
     public class FlockAgent : MonoBehaviour

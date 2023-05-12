@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
 
-namespace CrowdSimulation
+namespace CrowdSimulation_Base
 {
     [System.Serializable]
     public abstract class FormationBase
