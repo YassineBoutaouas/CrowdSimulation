@@ -22,13 +22,19 @@ namespace CrowdSimulation_MainThread_OOP
 
         private void Start()
         {
-            _previousTargetPos = _target.position;
-            _boxFormation.EvaluatePoints(SpawnCount, _target.position);
+            if (_target != null)
+            {
+                _previousTargetPos = _target.position;
+                _boxFormation.EvaluatePoints(SpawnCount, _target.position);
+            }
+
             Spawn();
         }
 
         private void Update()
         {
+            if(_target == null) return;
+            
             if (_previousTargetPos == _target.position) return;
 
             _boxFormation.EvaluatePoints(SpawnCount, _target.position);

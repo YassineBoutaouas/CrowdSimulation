@@ -68,16 +68,19 @@ namespace CrowdSimulation_MainThread_OOP
         {
             Vector3 acceleration = Vector3.zero;
 
-            if (Vector3.Distance(transform.position, Target.position) < _settings.MoveToCenterDistance)
+            if (Target != null)
             {
-                _agent.ResetPath();
-                _hasReachedTarget = true;
-                _agent.SetDestination(_boxFormation.Positions[_positionIndex]);
+                if (Vector3.Distance(transform.position, Target.position) < _settings.MoveToCenterDistance)
+                {
+                    _agent.ResetPath();
+                    _hasReachedTarget = true;
+                    _agent.SetDestination(_boxFormation.Positions[_positionIndex]);
+                }
+
+                if (_hasReachedTarget) return;
+
+                _agent.CalculatePath(Target.position, _pathToTarget);
             }
-
-            if (_hasReachedTarget) return;
-
-            _agent.CalculatePath(Target.position, _pathToTarget);
 
             if (_pathToTarget.corners.Length >= 1)
             {
@@ -88,7 +91,7 @@ namespace CrowdSimulation_MainThread_OOP
             if (NumPerceivedFlockmates != 0)
             {
                 CenterOfFlockmates /= NumPerceivedFlockmates;
-                
+
                 Vector3 offsetToFlockMatesCenter = (CenterOfFlockmates - Position);
 
                 Vector3 alignmentForce = SteerTowards(AvgFlockHeading) * _settings.AlignWeight;
@@ -128,17 +131,20 @@ namespace CrowdSimulation_MainThread_OOP
 
         private void OnDrawGizmosSelected()
         {
-            if (_pathToTarget == null) return;
-            if (_pathToTarget.corners.Length == 0)
+            if (Target != null)
             {
-                Debug.DrawLine(transform.position, Target.position, Color.grey);
-                return;
-            }
+                if (_pathToTarget == null) return;
+                if (_pathToTarget.corners.Length == 0)
+                {
+                    Debug.DrawLine(transform.position, Target.position, Color.grey);
+                    return;
+                }
 
-            for (int i = 0; i < _pathToTarget.corners.Length; i++)
-            {
-                if (i + 1 >= _pathToTarget.corners.Length) break;
-                Debug.DrawLine(_pathToTarget.corners[i], _pathToTarget.corners[i + 1], Color.grey);
+                for (int i = 0; i < _pathToTarget.corners.Length; i++)
+                {
+                    if (i + 1 >= _pathToTarget.corners.Length) break;
+                    Debug.DrawLine(_pathToTarget.corners[i], _pathToTarget.corners[i + 1], Color.grey);
+                }
             }
 
             Gizmos.color = Color.magenta + Color.grey;
