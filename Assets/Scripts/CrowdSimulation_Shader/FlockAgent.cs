@@ -86,6 +86,7 @@ namespace CrowdSimulation_Shader
             if (NumPerceivedFlockmates != 0)
             {
                 CenterOfFlockmates /= NumPerceivedFlockmates;
+
                 Vector3 offsetToFlockMatesCenter = (CenterOfFlockmates - Position);
 
                 Vector3 alignmentForce = SteerTowards(AvgFlockHeading) * _settings.AlignWeight;
@@ -141,8 +142,8 @@ namespace CrowdSimulation_Shader
             // Gizmos.color = Color.cyan;
             // Gizmos.DrawSphere(_pathToTarget.corners[1], 1);
 
-            // Gizmos.color = Color.magenta;
-            // Gizmos.DrawSphere(CenterOfFlockmates, 1);
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawSphere(CenterOfFlockmates, 1);
         }
     }
 }

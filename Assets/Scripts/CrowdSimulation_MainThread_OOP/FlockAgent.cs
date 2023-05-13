@@ -7,10 +7,13 @@ namespace CrowdSimulation_MainThread_OOP
     [RequireComponent(typeof(NavMeshAgent))]
     public class FlockAgent : MonoBehaviour
     {
+        private Animator _animator;
         private NavMeshPath _pathToTarget;
         private FlockSettings _settings;
         private NavMeshAgent _agent;
+        private Transform _cachedTransform;
 
+        #region Direction and Acceleration
         [HideInInspector]
         public Vector3 Position;
         [HideInInspector]
@@ -22,19 +25,18 @@ namespace CrowdSimulation_MainThread_OOP
         public Vector3 AvgAvoidanceHeading;
         [HideInInspector]
         public Vector3 CenterOfFlockmates;
+
+        private Vector3 _velocity;
+        #endregion
+
         [HideInInspector]
         public int NumPerceivedFlockmates;
 
-        private Vector3 _velocity;
-        private Vector3 _acceleration;
-
-        private Transform _cachedTransform;
         public Transform Target { get; private set; }
+        public bool _hasReachedTarget { get; private set; }
 
-        private Animator _animator;
         private BoxFormation _boxFormation;
         private int _positionIndex;
-        public bool _hasReachedTarget { get; private set; }
 
         private void Awake()
         {
@@ -86,6 +88,7 @@ namespace CrowdSimulation_MainThread_OOP
             if (NumPerceivedFlockmates != 0)
             {
                 CenterOfFlockmates /= NumPerceivedFlockmates;
+                
                 Vector3 offsetToFlockMatesCenter = (CenterOfFlockmates - Position);
 
                 Vector3 alignmentForce = SteerTowards(AvgFlockHeading) * _settings.AlignWeight;
@@ -137,6 +140,9 @@ namespace CrowdSimulation_MainThread_OOP
                 if (i + 1 >= _pathToTarget.corners.Length) break;
                 Debug.DrawLine(_pathToTarget.corners[i], _pathToTarget.corners[i + 1], Color.grey);
             }
+
+            Gizmos.color = Color.magenta + Color.grey;
+            Gizmos.DrawSphere(CenterOfFlockmates, 1);
         }
     }
 }

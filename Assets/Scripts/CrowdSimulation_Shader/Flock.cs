@@ -54,6 +54,8 @@ namespace CrowdSimulation_Shader
                 Agents[i].AvgAvoidanceHeading = agentData[i].AvoidanceHeading;
                 Agents[i].NumPerceivedFlockmates = agentData[i].NumFlockmates;
                 
+                Debug.Log(Agents[i].NumPerceivedFlockmates);
+
                 Agents[i].UpdateVelocity();
             }
 

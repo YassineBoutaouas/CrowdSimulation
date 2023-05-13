@@ -5,10 +5,9 @@ namespace CrowdSimulation_MainThread_OOP
     [CreateAssetMenu(menuName = "Flock/Settings/OOP_MainThread")]
     public class FlockSettings : ScriptableObject
     {
+        [Header("Acceleration"), Space()]
         public float MinSpeed = 2;
         public float MaxSpeed = 5;
-        public float PerceptionRadius = 2.5f;
-        public float AvoidanceRadius = 1;
         public float MaxSteerForce = 3;
 
         [Header("Weights"), Space()]
@@ -16,14 +15,6 @@ namespace CrowdSimulation_MainThread_OOP
         public float CohesionWeight = 1;
         public float SeperationWeight = 1;
         public float TargetWeight = 1;
-
-        public float AvoidCollisionWeight = 10;
-
-        [Header("Collisions"), Space()]
-        public LayerMask ObstacleLayer;
-        public float BoundsRadius = 0.27f;
-        public float CollisionAvoidanceDistance = 5;
-
         public float MoveToCenterDistance = 10f;
     }
 }

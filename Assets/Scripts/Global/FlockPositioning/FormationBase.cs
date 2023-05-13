@@ -13,6 +13,7 @@ namespace Global.Positioning
 
         protected int _currentFetchedPosition;
 
+        [HideInInspector()]
         public List<Vector3> Positions = new List<Vector3>();
 
         public abstract List<Vector3> EvaluatePoints(int spawnedAgents, Vector3 goal);
@@ -34,10 +35,10 @@ namespace Global.Positioning
 
         public void OnDrawGizmosSelected()
         {
-            Gizmos.color = Color.magenta;
+            Gizmos.color = Color.magenta + Color.grey;
             for (int i = 0; i < Positions.Count; i++)
             {
-                Gizmos.DrawSphere(Positions[i], 1);
+                Gizmos.DrawSphere(Positions[i], 0.5f);
             }
         }
     }

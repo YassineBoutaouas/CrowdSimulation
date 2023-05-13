@@ -19,7 +19,7 @@ MonoBehaviour:
   MaxSteerForce: 5
   AlignWeight: 1
   CohesionWeight: 1
-  SeperationWeight: 10
+  SeperationWeight: 1
   TargetWeight: 2
   AvoidCollisionWeight: 20
   ObstacleLayer:
