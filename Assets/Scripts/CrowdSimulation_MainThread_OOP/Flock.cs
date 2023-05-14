@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace CrowdSimulation_MainThread_OOP
 {
@@ -23,15 +24,9 @@ namespace CrowdSimulation_MainThread_OOP
         {
             if (Agents.Count == 0) return;
 
-            int numAgents = Agents.Count;
+            Profiler.BeginSample("Flock.UpdateNeighbors");
 
-            ///AgentData[] agentData = new AgentData[numAgents];
-            ///
-            ///for (int i = 0; i < Agents.Count; i++)
-            ///{
-            ///    agentData[i].Position = Agents[i].Position;
-            ///    agentData[i].Forward = Agents[i].Forward;
-            ///}
+            int numAgents = Agents.Count;
 
             for (int i = 0; i < numAgents; i++)
             {
@@ -64,32 +59,7 @@ namespace CrowdSimulation_MainThread_OOP
                 agentA.UpdateVelocity();
             }
 
-            /// ///---Agent shader data------------------------------------------------------
-            /// var agentBuffer = new ComputeBuffer(numAgents, AgentData.Size);
-            /// agentBuffer.SetData(agentData);
-            ///
-            /// shader.SetBuffer(0, "agents", agentBuffer);
-            /// shader.SetInt("numAgents", Agents.Count);
-            /// shader.SetFloat("viewRadius", PerceptionRadius);
-            /// shader.SetFloat("avoidRadius", AvoidanceRadius);
-            ///
-            /// int threadGroups = Mathf.CeilToInt(numAgents / (float)_threadGroupSize);
-            /// shader.Dispatch(0, threadGroups, 1, 1);
-            ///
-            /// agentBuffer.GetData(agentData);
-            ///
-            /// for (int i = 0; i < Agents.Count; i++)
-            /// {
-            ///     Agents[i].AvgFlockHeading = agentData[i].FlockHeading;
-            ///     Agents[i].CenterOfFlockmates = agentData[i].FlockCenter;
-            ///     Agents[i].AvgAvoidanceHeading = agentData[i].AvoidanceHeading;
-            ///     Agents[i].NumPerceivedFlockmates = agentData[i].NumFlockmates;
-            ///
-            ///     Agents[i].UpdateVelocity();
-            /// }
-            ///
-            /// agentBuffer.Release();
-            /// ///-------------------------------------------------------------------------
+            Profiler.EndSample();
         }
     }
 

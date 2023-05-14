@@ -2,10 +2,10 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace CrowdSimulation_Shader.Scenarios.Testing
+namespace Global.CrowdSimulation.Testing
 {
     [CustomEditor(typeof(ScenarioTesting), true), CanEditMultipleObjects]
-    public class ScenarioEditor : Editor
+    public class ScenarioEditor : UnityEditor.Editor
     {
         private ScenarioTesting _flock;
 

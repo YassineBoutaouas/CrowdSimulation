@@ -19,6 +19,8 @@ namespace CrowdSimulation_MainThread_OOP
         public BoxFormation _boxFormation;
 
         public event Action OnTargetPositionChanged;
+        public event Action OnTargetReached;
+        public void TargetReached(){ OnTargetReached?.Invoke(); }
 
         private void Start()
         {
@@ -50,7 +52,7 @@ namespace CrowdSimulation_MainThread_OOP
                 Vector2 pos = UnityEngine.Random.insideUnitCircle * SpawnRadius;
                 FlockAgent agent = Instantiate(AgentPrefabs[UnityEngine.Random.Range(0, AgentPrefabs.Count)], new Vector3(transform.position.x + pos.x, transform.position.y, transform.position.z + pos.y), Quaternion.LookRotation(UnityEngine.Random.insideUnitCircle, Vector3.up), transform);
                 agent.name = $"Agent_{i}";
-                agent.Initialize(Settings, _target, _boxFormation, i);
+                agent.Initialize(Settings, this, _target, _boxFormation, i);
 
                 OnTargetPositionChanged += agent.ChangeTargetState;
 

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Profiling;
 
 namespace Global.Positioning
 {
@@ -12,6 +13,8 @@ namespace Global.Positioning
 
         public override List<Vector3> EvaluatePoints(int spawnedAgents, Vector3 goal)
         {
+            Profiler.BeginSample("BoxFormations.EvaluatePositions");
+
             _currentFetchedPosition = 0;
             Positions.Clear();
             _spawnedAgents = spawnedAgents;
@@ -38,6 +41,8 @@ namespace Global.Positioning
                     Positions.Add(hit.position);
                 }
             }
+
+            Profiler.EndSample();
 
             return Positions;
         }

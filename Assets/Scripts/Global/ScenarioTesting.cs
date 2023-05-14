@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace CrowdSimulation_Shader.Scenarios.Testing
+namespace Global.CrowdSimulation.Testing
 {
     public class ScenarioTesting : MonoBehaviour
     {

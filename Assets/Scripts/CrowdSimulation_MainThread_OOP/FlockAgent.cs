@@ -1,12 +1,14 @@
 using Global.Positioning;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Profiling;
 
 namespace CrowdSimulation_MainThread_OOP
 {
     [RequireComponent(typeof(NavMeshAgent))]
     public class FlockAgent : MonoBehaviour
     {
+        private FlockSpawner _flockSpawner;
         private Animator _animator;
         private NavMeshPath _pathToTarget;
         private FlockSettings _settings;
@@ -44,11 +46,12 @@ namespace CrowdSimulation_MainThread_OOP
             _cachedTransform = transform;
         }
 
-        public void Initialize(FlockSettings settings, Transform target, BoxFormation boxFormation, int positionIndex)
+        public void Initialize(FlockSettings settings, FlockSpawner spawner, Transform target, BoxFormation boxFormation, int positionIndex)
         {
             _pathToTarget = new NavMeshPath();
             _boxFormation = boxFormation;
             _positionIndex = positionIndex;
+            _flockSpawner = spawner;
 
             _animator = GetComponent<Animator>();
 
@@ -66,6 +69,8 @@ namespace CrowdSimulation_MainThread_OOP
 
         public void UpdateVelocity()
         {
+            Profiler.BeginSample("FlockAgent.UpdateForces");
+
             Vector3 acceleration = Vector3.zero;
 
             if (Target != null)
@@ -75,6 +80,7 @@ namespace CrowdSimulation_MainThread_OOP
                     _agent.ResetPath();
                     _hasReachedTarget = true;
                     _agent.SetDestination(_boxFormation.Positions[_positionIndex]);
+                    _flockSpawner.TargetReached();
                 }
 
                 if (_hasReachedTarget) return;
@@ -114,6 +120,8 @@ namespace CrowdSimulation_MainThread_OOP
             Forward = dir;
 
             _agent.Move(_velocity * Time.deltaTime);
+
+            Profiler.EndSample();
         }
 
         public void ChangeTargetState()
