@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
+using Unity.Profiling;
 
 namespace CrowdSimulation_MainThread_OOP
 {
@@ -8,6 +9,7 @@ namespace CrowdSimulation_MainThread_OOP
     public class Flock : MonoBehaviour
     {
         public static Flock Instance;
+        //public static ProfilerCounterValue<int> frameCounter = new ProfilerCounterValue<int>("FrameCounter", ProfilerMarkerDataUnit.Count);
         public List<FlockAgent> Agents = new List<FlockAgent>();
 
 
