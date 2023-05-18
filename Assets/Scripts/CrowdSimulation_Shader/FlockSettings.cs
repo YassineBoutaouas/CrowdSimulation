@@ -14,7 +14,7 @@ namespace CrowdSimulation_Shader
         [Header("Weights"), Space()]
         public float AlignWeight = 1;
         public float CohesionWeight = 1;
-        public float SeperationWeight = 1;
+        public float SeparationWeight = 1;
         public float TargetWeight = 1;
 
         public float AvoidCollisionWeight = 10;

@@ -7,27 +7,6 @@ namespace CrowdSimulation_Shader
     [RequireComponent(typeof(NavMeshAgent))]
     public class FlockAgent : MonoBehaviour
     {
-        private NavMeshPath _pathToTarget;
-        private FlockSettings _settings;
-        private NavMeshAgent _agent;
-
-        [HideInInspector]
-        public Vector3 Position;
-        [HideInInspector]
-        public Vector3 Forward;
-
-        [HideInInspector]
-        public Vector3 AvgFlockHeading;
-        [HideInInspector]
-        public Vector3 AvgAvoidanceHeading;
-        [HideInInspector]
-        public Vector3 CenterOfFlockmates;
-        [HideInInspector]
-        public int NumPerceivedFlockmates;
-
-        private Vector3 _velocity;
-        private Vector3 _acceleration;
-
         private Transform _cachedTransform;
         public Transform Target { get; private set; }
 
@@ -35,6 +14,24 @@ namespace CrowdSimulation_Shader
         private BoxFormation _boxFormation;
         private int _positionIndex;
         public bool _hasReachedTarget { get; private set; }
+        
+        public NavMeshPath PathToTarget;
+        private FlockSettings _settings;
+        private NavMeshAgent _agent;
+
+        [HideInInspector]
+        public Vector3 Acceleration;
+
+        [HideInInspector]
+        public Vector3 Position;
+        [HideInInspector]
+        public Vector3 Forward;
+
+        [HideInInspector]
+        public Vector3 CenterOfFlockmates;
+
+        private Vector3 _velocity;
+        private Vector3 _acceleration;
 
         private void Awake()
         {
@@ -44,7 +41,7 @@ namespace CrowdSimulation_Shader
 
         public void Initialize(FlockSettings settings, Transform target, BoxFormation boxFormation, int positionIndex)
         {
-            _pathToTarget = new NavMeshPath();
+            PathToTarget = new NavMeshPath();
             _boxFormation = boxFormation;
             _positionIndex = positionIndex;
 
@@ -57,51 +54,53 @@ namespace CrowdSimulation_Shader
             Forward = _cachedTransform.forward;
 
             float startSpeed = (_settings.MinSpeed + _settings.MaxSpeed) / 2;
-            _velocity = _cachedTransform.forward * startSpeed;
+            _velocity = Vector3.zero; //_cachedTransform.forward * startSpeed;
 
             _agent.speed = Mathf.Lerp(_settings.MinSpeed, _settings.MaxSpeed, Random.Range(0f, 1f));
         }
 
         public void UpdateVelocity()
         {
-            Vector3 acceleration = Vector3.zero;
+            ///Outside of shader
+            /// if (Vector3.Distance(transform.position, Target.position) < _settings.MoveToCenterDistance)
+            /// {
+            ///     _agent.ResetPath();
+            ///     _hasReachedTarget = true;
+            ///     _agent.SetDestination(_boxFormation.Positions[_positionIndex]);
+            /// }
+            ///
+            /// if (_hasReachedTarget) return;
+            ///
+            ///_agent.CalculatePath(Target.position, _pathToTarget);
+            ///---------------------------------------------------
+            /// Vector3 acceleration = Vector3.zero;
+            ///
+            /// if (PathToTarget.corners.Length >= 1)
+            /// {
+            ///     Vector3 offsetToTarget = (PathToTarget.corners[1] - Position);
+            ///     acceleration = SteerTowards(offsetToTarget) * _settings.TargetWeight;
+            /// }
+            ///
+            /// if (NumPerceivedFlockmates != 0)
+            /// {
+            ///     CenterOfFlockmates /= NumPerceivedFlockmates;
+            ///
+            ///     Vector3 offsetToFlockMatesCenter = (CenterOfFlockmates - Position);
+            ///
+            ///     Vector3 alignmentForce = SteerTowards(AvgFlockHeading) * _settings.AlignWeight;
+            ///     Vector3 cohesionForce = SteerTowards(offsetToFlockMatesCenter) * _settings.CohesionWeight;
+            ///     Vector3 seperationForce = SteerTowards(AvgAvoidanceHeading) * _settings.SeparationWeight;
+            ///
+            ///     acceleration += alignmentForce;
+            ///     acceleration += cohesionForce;
+            ///     acceleration += seperationForce;
+            /// }
 
-            if (Vector3.Distance(transform.position, Target.position) < _settings.MoveToCenterDistance)
-            {
-                _agent.ResetPath();
-                _hasReachedTarget = true;
-                _agent.SetDestination(_boxFormation.Positions[_positionIndex]);
-            }
+            //Debug.Log($"Acceleration: {Acceleration}; Velocity: {_velocity}");
 
-            if (_hasReachedTarget) return;
-
-            _agent.CalculatePath(Target.position, _pathToTarget);
-
-            if (_pathToTarget.corners.Length >= 1)
-            {
-                Vector3 offsetToTarget = (_pathToTarget.corners[1] - Position);
-                acceleration = SteerTowards(offsetToTarget) * _settings.TargetWeight;
-            }
-
-            if (NumPerceivedFlockmates != 0)
-            {
-                CenterOfFlockmates /= NumPerceivedFlockmates;
-
-                Vector3 offsetToFlockMatesCenter = (CenterOfFlockmates - Position);
-
-                Vector3 alignmentForce = SteerTowards(AvgFlockHeading) * _settings.AlignWeight;
-                Vector3 cohesionForce = SteerTowards(offsetToFlockMatesCenter) * _settings.CohesionWeight;
-                Vector3 seperationForce = SteerTowards(AvgAvoidanceHeading) * _settings.SeperationWeight;
-
-                acceleration += alignmentForce;
-                acceleration += cohesionForce;
-                acceleration += seperationForce;
-            }
-
-            _velocity += acceleration * Time.deltaTime;
-            float speed = _velocity.magnitude;
+            _velocity = Acceleration * Time.deltaTime;
             Vector3 dir = _velocity.normalized;
-            speed = Mathf.Clamp(speed, _settings.MinSpeed, _settings.MaxSpeed);
+            float speed = Mathf.Clamp(_velocity.magnitude, _settings.MinSpeed, _settings.MaxSpeed);
             _velocity = dir * speed;
 
             Position = _cachedTransform.position;
@@ -110,6 +109,8 @@ namespace CrowdSimulation_Shader
 
             _agent.Move(_velocity * Time.deltaTime);
         }
+
+        public void CalculatePath() { _agent.CalculatePath(Target.position, PathToTarget); }
 
         public void ChangeTargetState()
         {
@@ -126,17 +127,17 @@ namespace CrowdSimulation_Shader
 
         private void OnDrawGizmosSelected()
         {
-            if (_pathToTarget == null) return;
-            if (_pathToTarget.corners.Length == 0)
+            if (PathToTarget == null) return;
+            if (PathToTarget.corners.Length == 0)
             {
                 Debug.DrawLine(transform.position, Target.position, Color.grey);
                 return;
             }
 
-            for (int i = 0; i < _pathToTarget.corners.Length; i++)
+            for (int i = 0; i < PathToTarget.corners.Length; i++)
             {
-                if (i + 1 >= _pathToTarget.corners.Length) break;
-                Debug.DrawLine(_pathToTarget.corners[i], _pathToTarget.corners[i + 1], Color.grey);
+                if (i + 1 >= PathToTarget.corners.Length) break;
+                Debug.DrawLine(PathToTarget.corners[i], PathToTarget.corners[i + 1], Color.grey);
             }
 
             // Gizmos.color = Color.cyan;

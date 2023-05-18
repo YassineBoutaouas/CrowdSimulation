@@ -46,7 +46,7 @@ namespace CrowdSimulation_Shader
                 agent.name = $"Agent_{i}";
                 agent.Initialize(Settings, _target, _boxFormation, i);
 
-                OnTargetPositionChanged += agent.ChangeTargetState;
+                // OnTargetPositionChanged += agent.ChangeTargetState;
 
                 Flock.Instance.Agents.Add(agent);
             }

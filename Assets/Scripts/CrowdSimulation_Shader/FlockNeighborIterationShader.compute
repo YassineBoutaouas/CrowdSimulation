@@ -1,0 +1,96 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+static const int threadGroupSize = 1024;
+
+struct Agent
+{
+    float3 position;
+    float3 direction;
+
+    float3 flockHeading;
+    float3 flockCenter;
+    float3 separationHeading;
+
+    float3 targetPosition;
+
+    int numFlockmates;
+
+    float3 acceleration;
+};
+
+RWStructuredBuffer<Agent> agents;
+int numAgents;
+
+float viewRadius;
+float avoidRadius;
+
+float maxSpeed;
+float maxSteerForce;
+
+float alignWeight;
+float cohesionWeight;
+float separationWeight;
+
+float3 SteerTowards(float3 velocity)
+{
+    //float3 result = normalize(velocity) * maxSpeed - velocity;
+
+    float len = clamp(length(velocity), 0, maxSteerForce);
+
+    if(len == 0) return float3(0,0,0);
+
+    return normalize(velocity) * len; //normalize(velocity); //* len;
+}
+
+[numthreads(threadGroupSize, 1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    agents[id.x].numFlockmates = 0;
+
+    agents[id.x].flockHeading = float3(0,0,0);
+    agents[id.x].flockCenter = float3(0,0,0);
+    agents[id.x].separationHeading = float3(0,0,0);
+
+    for (int indexB = 0; indexB < numAgents; indexB++)
+    {
+        Agent agentB = agents[indexB];
+        float3 offset = agentB.position - agents[id.x].position;
+        float sqrDst = offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
+
+        if (sqrDst < viewRadius * viewRadius) {
+            agents[id.x].numFlockmates += 1;
+        
+            agents[id.x].flockHeading += agentB.direction;
+            agents[id.x].flockCenter += agentB.position;
+
+            if (sqrDst < (avoidRadius * avoidRadius)) {
+                agents[id.x].separationHeading -= offset / sqrDst;
+            }
+        }
+    }
+
+    //Calculate acceleration
+    agents[id.x].acceleration = float3(0,0,0);
+
+    //In case path.length > 0 - targetPos = path[1]
+    float3 offsetToTarget = agents[id.x].targetPosition - agents[id.x].position;
+    float3 targetForce = SteerTowards(offsetToTarget);
+
+    float3 alignment =  float3(0,0,0);
+    float3 cohesion = float3(0,0,0);
+    float3 separation = float3(0,0,0);
+
+    if(agents[id.x].numFlockmates > 0)
+    {
+        agents[id.x].flockCenter /= agents[id.x].numFlockmates;
+
+        float3 offsetToFlockCenter = (agents[id.x].flockCenter - agents[id.x].position);
+
+        alignment = SteerTowards(agents[id.x].flockHeading) * alignWeight;
+        cohesion = SteerTowards(offsetToFlockCenter) * cohesionWeight;
+        separation = SteerTowards(agents[id.x].separationHeading) * separationWeight;
+        agents[id.x].separationHeading = separation;
+    }
+
+    agents[id.x].acceleration = targetForce + alignment + cohesion;// + separation;
+}
