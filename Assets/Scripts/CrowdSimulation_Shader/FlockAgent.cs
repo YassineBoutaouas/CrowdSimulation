@@ -61,43 +61,6 @@ namespace CrowdSimulation_Shader
 
         public void UpdateVelocity()
         {
-            ///Outside of shader
-            /// if (Vector3.Distance(transform.position, Target.position) < _settings.MoveToCenterDistance)
-            /// {
-            ///     _agent.ResetPath();
-            ///     _hasReachedTarget = true;
-            ///     _agent.SetDestination(_boxFormation.Positions[_positionIndex]);
-            /// }
-            ///
-            /// if (_hasReachedTarget) return;
-            ///
-            ///_agent.CalculatePath(Target.position, _pathToTarget);
-            ///---------------------------------------------------
-            /// Vector3 acceleration = Vector3.zero;
-            ///
-            /// if (PathToTarget.corners.Length >= 1)
-            /// {
-            ///     Vector3 offsetToTarget = (PathToTarget.corners[1] - Position);
-            ///     acceleration = SteerTowards(offsetToTarget) * _settings.TargetWeight;
-            /// }
-            ///
-            /// if (NumPerceivedFlockmates != 0)
-            /// {
-            ///     CenterOfFlockmates /= NumPerceivedFlockmates;
-            ///
-            ///     Vector3 offsetToFlockMatesCenter = (CenterOfFlockmates - Position);
-            ///
-            ///     Vector3 alignmentForce = SteerTowards(AvgFlockHeading) * _settings.AlignWeight;
-            ///     Vector3 cohesionForce = SteerTowards(offsetToFlockMatesCenter) * _settings.CohesionWeight;
-            ///     Vector3 seperationForce = SteerTowards(AvgAvoidanceHeading) * _settings.SeparationWeight;
-            ///
-            ///     acceleration += alignmentForce;
-            ///     acceleration += cohesionForce;
-            ///     acceleration += seperationForce;
-            /// }
-
-            //Debug.Log($"Acceleration: {Acceleration}; Velocity: {_velocity}");
-
             _velocity = Acceleration * Time.deltaTime;
             Vector3 dir = _velocity.normalized;
             float speed = Mathf.Clamp(_velocity.magnitude, _settings.MinSpeed, _settings.MaxSpeed);

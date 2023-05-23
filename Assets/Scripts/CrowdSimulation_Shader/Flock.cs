@@ -63,14 +63,10 @@ namespace CrowdSimulation_Shader
             for(int i = 0; i < numAgents; i++)
             {
                 Agents[i].Acceleration = agentData[i].Acceleration;
-                Debug.Log(agentData[i].SeparationHeading);
                 Agents[i].UpdateVelocity();
-
-                // Debug.Log(Agents[i].Acceleration);
             }
 
             _agentBuffer.Release();
-            ///-------------------------------------------------------------------------
         }
 
         private void OnDisable(){

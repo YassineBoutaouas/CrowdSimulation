@@ -16,14 +16,6 @@ namespace CrowdSimulation_Shader
         public float CohesionWeight = 1;
         public float SeparationWeight = 1;
         public float TargetWeight = 1;
-
-        public float AvoidCollisionWeight = 10;
-
-        [Header("Collisions"), Space()]
-        public LayerMask ObstacleLayer;
-        public float BoundsRadius = 0.27f;
-        public float CollisionAvoidanceDistance = 5;
-
         public float MoveToCenterDistance = 10f;
     }
 }  
