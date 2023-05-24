@@ -16,7 +16,20 @@ namespace CrowdSimulation_Shader
         public ComputeShader shader;
         private ComputeBuffer _agentBuffer;
 
-        private void Awake() { Instance = this; }
+        private void Awake() 
+        { 
+            Instance = this;
+
+            shader.SetFloat("viewRadius", Settings.PerceptionRadius);
+            shader.SetFloat("avoidRadius", Settings.AvoidanceRadius);
+
+            shader.SetFloat("maxSpeed", Settings.MaxSpeed);
+            shader.SetFloat("maxSteerForce", Settings.MaxSteerForce);
+
+            shader.SetFloat("alignWeight", Settings.AlignWeight);
+            shader.SetFloat("cohesionWeight", Settings.CohesionWeight);
+            shader.SetFloat("separationWeight", Settings.SeparationWeight); 
+        }
 
         private void Update()
         {
@@ -44,16 +57,6 @@ namespace CrowdSimulation_Shader
 
             shader.SetInt("numAgents", Agents.Count);
 
-            shader.SetFloat("viewRadius", Settings.PerceptionRadius);
-            shader.SetFloat("avoidRadius", Settings.AvoidanceRadius);
-
-            shader.SetFloat("maxSpeed", Settings.MaxSpeed);
-            shader.SetFloat("maxSteerForce", Settings.MaxSteerForce);
-
-            shader.SetFloat("alignWeight", Settings.AlignWeight);
-            shader.SetFloat("cohesionWeight", Settings.CohesionWeight);
-            shader.SetFloat("separationWeight", Settings.SeparationWeight);
-
             int threadGroups = Mathf.CeilToInt(numAgents / (float)_threadGroupSize);
 
             shader.Dispatch(0, threadGroups, 1, 1);
@@ -63,6 +66,7 @@ namespace CrowdSimulation_Shader
             for(int i = 0; i < numAgents; i++)
             {
                 Agents[i].Acceleration = agentData[i].Acceleration;
+                Agents[i].CenterOfFlockmates = agentData[i].FlockCenter;
                 Agents[i].UpdateVelocity();
             }
 
@@ -79,21 +83,20 @@ namespace CrowdSimulation_Shader
         public Vector3 Position;
         public Vector3 Direction;
 
-        public Vector3 FlockHeading;
         public Vector3 FlockCenter;
-        public Vector3 SeparationHeading;
-
         public Vector3 TargetPosition;
 
-        public int NumFlockMates;
-
         public Vector3 Acceleration;
+
+        //public Vector3 FlockHeading;
+        //public Vector3 SeparationHeading;
+        //public int NumFlockMates;
 
         public static int Size
         {
             get
             {
-                return sizeof(float) * 3 * 7 + sizeof(int); //For seven vectors and one integer
+                return sizeof(float) * 3 * 5; //7 + sizeof(int); //For seven vectors and one integer
             }
         }
     }

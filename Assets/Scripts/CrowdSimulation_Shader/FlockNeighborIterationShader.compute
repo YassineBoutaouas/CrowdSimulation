@@ -7,13 +7,8 @@ struct Agent
     float3 position;
     float3 direction;
 
-    float3 flockHeading;
     float3 flockCenter;
-    float3 separationHeading;
-
     float3 targetPosition;
-
-    int numFlockmates;
 
     float3 acceleration;
 };
@@ -33,21 +28,21 @@ float separationWeight;
 
 float3 SteerTowards(float3 velocity)
 {
-    //float3 result = normalize(velocity) * maxSpeed - velocity;
-
     float len = clamp(length(velocity), 0, maxSteerForce);
 
-    return normalize(velocity) * len; //normalize(velocity); //* len;
+    return normalize(velocity) * len;
 }
 
 [numthreads(threadGroupSize, 1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    agents[id.x].numFlockmates = 0;
-
-    agents[id.x].flockHeading = float3(0,0,0);
+    agents[id.x].acceleration = float3(0,0,0);
     agents[id.x].flockCenter = float3(0,0,0);
-    agents[id.x].separationHeading = float3(0,0,0);
+
+    int numFlockmates = 0;
+
+    float3 flockHeading = float3(0,0,0);
+    float3 separationHeading = float3(0,0,0);
 
     for (int indexB = 0; indexB < numAgents; indexB++)
     {
@@ -59,12 +54,12 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
             if (sqrDst < viewRadius * viewRadius)
             {
-                agents[id.x].numFlockmates++;
-                agents[id.x].flockHeading += agentB.direction;
+                numFlockmates++;
+                flockHeading += agentB.direction;
                 agents[id.x].flockCenter += agentB.position;
 
                 if (sqrDst < (avoidRadius * avoidRadius)) {
-                    agents[id.x].separationHeading -= (offset / sqrDst);
+                    separationHeading -= (offset / sqrDst);
                 }
             }
         }
@@ -76,12 +71,12 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     agents[id.x].acceleration = SteerTowards(offsetToTarget);
 
-    if(agents[id.x].numFlockmates == 0) return;
+    if(numFlockmates == 0) return;
 
-    agents[id.x].flockCenter /= agents[id.x].numFlockmates;
+    agents[id.x].flockCenter /= numFlockmates;
 
     float3 offsetToFlockCenter = (agents[id.x].flockCenter - agents[id.x].position);
 
 
-    agents[id.x].acceleration += SteerTowards(agents[id.x].flockHeading) * alignWeight + SteerTowards(offsetToFlockCenter) * cohesionWeight + SteerTowards(agents[id.x].separationHeading) * separationWeight;
+    agents[id.x].acceleration += SteerTowards(flockHeading) * alignWeight + SteerTowards(offsetToFlockCenter) * cohesionWeight + SteerTowards(separationHeading) * separationWeight;
 }

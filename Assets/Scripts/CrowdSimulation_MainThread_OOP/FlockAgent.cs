@@ -75,15 +75,15 @@ namespace CrowdSimulation_MainThread_OOP
 
             if (Target != null)
             {
-                if (Vector3.Distance(transform.position, Target.position) < _settings.MoveToCenterDistance)
-                {
-                    _agent.ResetPath();
-                    _hasReachedTarget = true;
-                    _agent.SetDestination(_boxFormation.Positions[_positionIndex]);
-                    _flockSpawner.TargetReached();
-                }
+                // if (Vector3.Distance(transform.position, Target.position) < _settings.MoveToCenterDistance)
+                // {
+                //     _agent.ResetPath();
+                //     _hasReachedTarget = true;
+                //     _agent.SetDestination(_boxFormation.Positions[_positionIndex]);
+                //     _flockSpawner.TargetReached();
+                // }
 
-                if (_hasReachedTarget) return;
+                // if (_hasReachedTarget) return;
 
                 _agent.CalculatePath(Target.position, _pathToTarget);
             }
