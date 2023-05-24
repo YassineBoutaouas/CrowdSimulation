@@ -14,7 +14,7 @@ struct Agent
 };
 
 RWStructuredBuffer<Agent> agents;
-int numAgents;
+uint numAgents;
 
 float viewRadius;
 float avoidRadius;
@@ -33,6 +33,16 @@ float3 SteerTowards(float3 velocity)
     return normalize(velocity) * len;
 }
 
+float WhenLessThan(float a, float b)
+{
+    return max(sign(b-a), 0.0);
+}
+
+int WhenEqual(uint a, int b)
+{
+    return 1 - abs(sign(b-a));
+}
+
 [numthreads(threadGroupSize, 1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
@@ -44,7 +54,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float3 flockHeading = float3(0,0,0);
     float3 separationHeading = float3(0,0,0);
 
-    for (int indexB = 0; indexB < numAgents; indexB++)
+    for (uint indexB = 0; indexB < numAgents; indexB++)
     {
         if(id.x != indexB)
         {
@@ -52,14 +62,17 @@ void CSMain (uint3 id : SV_DispatchThreadID)
             float3 offset = agentB.position - agents[id.x].position;
             float sqrDst = offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
 
+            //float inViewRadius = WhenLessThan(sqrDst, viewRadius * viewRadius);
+            //float inAvoidanceRange = WhenLessThan(sqrDst, avoidRadius * avoidRadius);
+
             if (sqrDst < viewRadius * viewRadius)
             {
-                numFlockmates++;
-                flockHeading += agentB.direction;
-                agents[id.x].flockCenter += agentB.position;
+                numFlockmates += 1; //inViewRadius;
+                flockHeading += agentB.direction;// * inViewRadius;
+                agents[id.x].flockCenter += agentB.position;// * inViewRadius;
 
                 if (sqrDst < (avoidRadius * avoidRadius)) {
-                    separationHeading -= (offset / sqrDst);
+                 separationHeading -= ((offset / sqrDst));// * inAvoidanceRange);
                 }
             }
         }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace CrowdSimulation_Shader
 {
@@ -33,6 +34,7 @@ namespace CrowdSimulation_Shader
 
         private void Update()
         {
+            Profiler.BeginSample("Flock.Update");
             if (Agents.Count == 0) return;
 
             int numAgents = Agents.Count;
@@ -71,6 +73,7 @@ namespace CrowdSimulation_Shader
             }
 
             _agentBuffer.Release();
+            Profiler.EndSample();
         }
 
         private void OnDisable(){
