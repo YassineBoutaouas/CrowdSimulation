@@ -1,0 +1,16 @@
+{
+    "name": "CrowdSimulation_Shader",
+    "rootNamespace": "",
+    "references": [
+        "GUID:2361f2476a873e34ba6fb622d84e8123"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
