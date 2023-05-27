@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Profiling;
 
-namespace CrowdSimulation_MainThread_OOP
+namespace CrowdSimulation_OOP
 {
     [RequireComponent(typeof(NavMeshAgent))]
     public class FlockAgent : MonoBehaviour

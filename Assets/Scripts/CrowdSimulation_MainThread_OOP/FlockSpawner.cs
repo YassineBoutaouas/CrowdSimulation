@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Global.Positioning;
 using UnityEngine;
 
-namespace CrowdSimulation_MainThread_OOP
+namespace CrowdSimulation_OOP
 {
     public class FlockSpawner : MonoBehaviour
     {

@@ -44,7 +44,7 @@ namespace Octree_Points
 
             if (GUILayout.Button("Get neighbors"))
             {
-                instance.neighbors = instance.pointOctree.GetNearby(instance.transform.position, instance.perceptionRadius);
+                instance.neighbors = instance.pointOctree.GetNearbyToArray(instance.transform.position, instance.perceptionRadius);
             }
 
             for (int i = 0; i < instance.neighbors.Length; i++)

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace CrowdSimulation_MainThread_OOP
+namespace CrowdSimulation_OOP
 {
     [CreateAssetMenu(menuName = "Flock/Settings/OOP_MainThread")]
     public class FlockSettings : ScriptableObject

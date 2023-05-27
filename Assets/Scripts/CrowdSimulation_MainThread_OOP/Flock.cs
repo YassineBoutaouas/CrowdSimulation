@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using Unity.Profiling;
 
-namespace CrowdSimulation_MainThread_OOP
+namespace CrowdSimulation_OOP
 {
 
     public class Flock : MonoBehaviour
@@ -64,23 +64,4 @@ namespace CrowdSimulation_MainThread_OOP
             Profiler.EndSample();
         }
     }
-
-    /// public struct AgentData
-    /// {
-    ///     public Vector3 Position;
-    ///     public Vector3 Forward;
-    ///
-    ///     public Vector3 FlockHeading;
-    ///     public Vector3 FlockCenter;
-    ///     public Vector3 AvoidanceHeading;
-    ///     public int NumFlockmates;
-    ///
-    ///     public static int Size
-    ///     {
-    ///         get
-    ///         {
-    ///             return sizeof(float) * 3 * 5 + sizeof(int); //For five vectors and one integer
-    ///         }
-    ///     }
-    /// }
 }

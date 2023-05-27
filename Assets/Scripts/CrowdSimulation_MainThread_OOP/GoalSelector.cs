@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CrowdSimulation_MainThread_OOP
+namespace CrowdSimulation_OOP
 {
     public class GoalSelector : MonoBehaviour
     {

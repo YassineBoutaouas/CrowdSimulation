@@ -176,23 +176,11 @@ namespace Octree_Points
         {
             float sqrMaxDistance = maxDistance * maxDistance;
 
-#if UNITY_2017_1_OR_NEWER
             // Does the node intersect with the sphere of center = position and radius = maxDistance?
             if ((bounds.ClosestPoint(position) - position).sqrMagnitude > sqrMaxDistance)
             {
                 return;
             }
-#else
-		// Does the ray hit this node at all?
-		// Note: Expanding the bounds is not exactly the same as a real distance check, but it's fast
-		// TODO: Does someone have a fast AND accurate formula to do this check?
-		bounds.Expand(new Vector3(maxDistance * 2, maxDistance * 2, maxDistance * 2));
-		bool contained = bounds.Contains(position);
-		bounds.size = actualBoundsSize;
-		if (!contained) {
-			return;
-		}
-#endif
 
             // Check against any objects in this node
             for (int i = 0; i < objects.Count; i++)
