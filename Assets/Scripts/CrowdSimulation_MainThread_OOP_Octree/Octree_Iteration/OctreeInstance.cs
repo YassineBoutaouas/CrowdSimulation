@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CrowdSimulation_OT_OOP;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -10,13 +11,13 @@ namespace Octree_Points
 {
     public class OctreeInstance : MonoBehaviour
     {
-        public GameObject[] neighbors;
+        public FlockAgent[] neighbors;
 
-        public PointOctree<GameObject> pointOctree;
+        public PointOctree pointOctree;
 
         public float perceptionRadius = 5f;
 
-        public void Init(PointOctree<GameObject> octree)
+        public void Init(PointOctree octree)
         {
             pointOctree = octree;
         }
@@ -42,15 +43,15 @@ namespace Octree_Points
         {
             base.OnInspectorGUI();
 
-            if (GUILayout.Button("Get neighbors"))
-            {
-                instance.neighbors = instance.pointOctree.GetNearbyToArray(instance.transform.position, instance.perceptionRadius);
-            }
-
-            for (int i = 0; i < instance.neighbors.Length; i++)
-            {
-                Debug.DrawLine(instance.transform.position, instance.neighbors[i].transform.position, Color.red);
-            }
+            //if (GUILayout.Button("Get neighbors"))
+            //{
+            //    instance.neighbors = instance.pointOctree.GetNearbyToArray(, instance.transform.position, instance.perceptionRadius);
+            //}
+//
+            //for (int i = 0; i < instance.neighbors.Length; i++)
+            //{
+            //    Debug.DrawLine(instance.transform.position, instance.neighbors[i].transform.position, Color.red);
+            //}
         }
     }
 #endif

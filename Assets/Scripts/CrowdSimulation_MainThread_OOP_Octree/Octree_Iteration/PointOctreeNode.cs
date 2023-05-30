@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using CrowdSimulation_OT_OOP;
 using UnityEngine;
 
 namespace Octree_Points
 {
-    public class PointOctreeNode<T>
+    public class PointOctreeNode
     {
         // Centre of this node
         public Vector3 Center { get; private set; }
@@ -19,10 +20,10 @@ namespace Octree_Points
         Bounds bounds = default(Bounds);
 
         // Objects in this node
-        readonly List<OctreeObject> objects = new List<OctreeObject>();
+        readonly List<FlockAgent> objects = new List<FlockAgent>();
 
         // Child nodes, if any
-        PointOctreeNode<T>[] children = null;
+        PointOctreeNode[] children = null;
 
         bool HasChildren { get { return children != null; } }
 
@@ -35,13 +36,6 @@ namespace Octree_Points
 
         // For reverting the bounds size after temporary changes
         Vector3 actualBoundsSize;
-
-        // An object in the octree
-        class OctreeObject
-        {
-            public T Obj;
-            public Vector3 Pos;
-        }
 
         /// <summary>
         /// Constructor.
@@ -62,7 +56,7 @@ namespace Octree_Points
         /// <param name="obj">Object to add.</param>
         /// <param name="objPos">Position of the object.</param>
         /// <returns></returns>
-        public bool Add(T obj, Vector3 objPos)
+        public bool Add(FlockAgent obj, Vector3 objPos)
         {
             if (!Encapsulates(bounds, objPos))
             {
@@ -77,13 +71,13 @@ namespace Octree_Points
         /// </summary>
         /// <param name="obj">Object to remove.</param>
         /// <returns>True if the object was removed successfully.</returns>
-        public bool Remove(T obj)
+        public bool Remove(FlockAgent obj)
         {
             bool removed = false;
 
             for (int i = 0; i < objects.Count; i++)
             {
-                if (objects[i].Obj.Equals(obj))
+                if (objects[i].Equals(obj))
                 {
                     removed = objects.Remove(objects[i]);
                     break;
@@ -117,7 +111,7 @@ namespace Octree_Points
         /// <param name="obj">Object to remove.</param>
         /// <param name="objPos">Position of the object.</param>
         /// <returns>True if the object was removed successfully.</returns>
-        public bool Remove(T obj, Vector3 objPos)
+        public bool Remove(FlockAgent obj, Vector3 objPos)
         {
             if (!Encapsulates(bounds, objPos))
             {
@@ -133,7 +127,7 @@ namespace Octree_Points
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
         /// <param name="result">List result.</param>
         /// <returns>Objects within range.</returns>
-        public void GetNearby(ref Ray ray, float maxDistance, List<T> result)
+        public void GetNearby(FlockAgent agent, ref Ray ray, float maxDistance, float avoidance, List<FlockAgent> result)
         {
             // Does the ray hit this node at all?
             // Note: Expanding the bounds is not exactly the same as a real distance check, but it's fast.
@@ -149,9 +143,9 @@ namespace Octree_Points
             // Check against any objects in this node
             for (int i = 0; i < objects.Count; i++)
             {
-                if (SqrDistanceToRay(ray, objects[i].Pos) <= (maxDistance * maxDistance))
+                if (SqrDistanceToRay(ray, objects[i].Position) <= (maxDistance * maxDistance))
                 {
-                    result.Add(objects[i].Obj);
+                    result.Add(objects[i]);
                 }
             }
 
@@ -160,34 +154,43 @@ namespace Octree_Points
             {
                 for (int i = 0; i < 8; i++)
                 {
-                    children[i].GetNearby(ref ray, maxDistance, result);
+                    children[i].GetNearby(agent, ref ray, maxDistance, avoidance, result);
                 }
             }
         }
 
         /// <summary>
-        /// Return objects that are within <paramref name="maxDistance"/> of the specified position.
+        /// Return objects that are within <paramref name="perceptionRadius"/> of the specified position.
         /// </summary>
         /// <param name="position">The position.</param>
-        /// <param name="maxDistance">Maximum distance from the position to consider.</param>
+        /// <param name="perceptionRadius">Maximum distance from the position to consider.</param>
         /// <param name="result">List result.</param>
         /// <returns>Objects within range.</returns>
-        public void GetNearby(ref Vector3 position, float maxDistance, List<T> result)
+        public void GetNearby(FlockAgent agent, ref Vector3 position, float perceptionRadius, float avoidanceRadius)
         {
-            float sqrMaxDistance = maxDistance * maxDistance;
+            float sqrMaxDistance = perceptionRadius * perceptionRadius;
 
             // Does the node intersect with the sphere of center = position and radius = maxDistance?
             if ((bounds.ClosestPoint(position) - position).sqrMagnitude > sqrMaxDistance)
-            {
                 return;
-            }
 
             // Check against any objects in this node
             for (int i = 0; i < objects.Count; i++)
             {
-                if ((position - objects[i].Pos).sqrMagnitude <= sqrMaxDistance)
+                if(agent == objects[i]) continue;
+                
+                Vector3 offset = (position - objects[i].Position);
+                float sqrDistance = offset.sqrMagnitude;
+
+                if (sqrDistance <= sqrMaxDistance)
                 {
-                    result.Add(objects[i].Obj);
+                    agent.AvgFlockHeading += objects[i].Forward;
+                    agent.CenterOfFlockmates += objects[i].Position;
+
+                    if(sqrDistance < avoidanceRadius * avoidanceRadius)
+                        agent.AvgAvoidanceHeading -= offset / sqrDistance;
+
+                    //result.Add(objects[i]);
                 }
             }
 
@@ -196,19 +199,24 @@ namespace Octree_Points
             {
                 for (int i = 0; i < 8; i++)
                 {
-                    children[i].GetNearby(ref position, maxDistance, result);
+                    children[i].GetNearby(agent, ref position, perceptionRadius, avoidanceRadius);
                 }
             }
+        }
+
+        public void UpdateFlockNeighbors(ref FlockAgent agent, float perceptionRadius)
+        {
+
         }
 
         /// <summary>
         /// Return all objects in the tree.
         /// </summary>
         /// <returns>All objects.</returns>
-        public void GetAll(List<T> result)
+        public void GetAll(List<FlockAgent> result)
         {
             // add directly contained objects
-            result.AddRange(objects.Select(o => o.Obj));
+            result.AddRange(result);
 
             // add children objects
             if (children != null)
@@ -224,7 +232,7 @@ namespace Octree_Points
         /// Set the 8 children of this octree.
         /// </summary>
         /// <param name="childOctrees">The 8 new child nodes.</param>
-        public void SetChildren(PointOctreeNode<T>[] childOctrees)
+        public void SetChildren(PointOctreeNode[] childOctrees)
         {
             if (childOctrees.Length != 8)
             {
@@ -246,7 +254,7 @@ namespace Octree_Points
         /// </summary>
         /// <param name="minLength">Minimum dimensions of a node in this octree.</param>
         /// <returns>The new root, or the existing one if we didn't shrink.</returns>
-        public PointOctreeNode<T> ShrinkIfPossible(float minLength)
+        public PointOctreeNode ShrinkIfPossible(float minLength)
         {
             if (SideLength < (2 * minLength))
             {
@@ -261,8 +269,8 @@ namespace Octree_Points
             int bestFit = -1;
             for (int i = 0; i < objects.Count; i++)
             {
-                OctreeObject curObj = objects[i];
-                int newBestFit = BestFitChild(curObj.Pos);
+                FlockAgent curObj = objects[i];
+                int newBestFit = BestFitChild(curObj.Position);
                 if (i == 0 || newBestFit == bestFit)
                 {
                     if (bestFit < 0)
@@ -377,7 +385,7 @@ namespace Octree_Points
         /// </summary>
         /// <param name="obj">Object to add.</param>
         /// <param name="objPos">Position of the object.</param>
-        void SubAdd(T obj, Vector3 objPos)
+        void SubAdd(FlockAgent obj, Vector3 objPos)
         {
             // We know it fits at this level if we've got this far
 
@@ -388,8 +396,7 @@ namespace Octree_Points
                 // Just add if few objects are here, or children would be below min size
                 if (objects.Count < NUM_OBJECTS_ALLOWED || (SideLength / 2) < minSize)
                 {
-                    OctreeObject newObj = new OctreeObject { Obj = obj, Pos = objPos };
-                    objects.Add(newObj);
+                    objects.Add(obj);
                     return; // We're done. No children yet
                 }
 
@@ -407,11 +414,11 @@ namespace Octree_Points
                     // Now that we have the new children, move this node's existing objects into them
                     for (int i = objects.Count - 1; i >= 0; i--)
                     {
-                        OctreeObject existingObj = objects[i];
+                        FlockAgent existingObj = objects[i];
                         // Find which child the object is closest to based on where the
                         // object's center is located in relation to the octree's center
-                        bestFitChild = BestFitChild(existingObj.Pos);
-                        children[bestFitChild].SubAdd(existingObj.Obj, existingObj.Pos); // Go a level deeper					
+                        bestFitChild = BestFitChild(existingObj.Position);
+                        children[bestFitChild].SubAdd(existingObj, existingObj.Position); // Go a level deeper					
                         objects.Remove(existingObj); // Remove from here
                     }
                 }
@@ -428,13 +435,13 @@ namespace Octree_Points
         /// <param name="obj">Object to remove.</param>
         /// <param name="objPos">Position of the object.</param>
         /// <returns>True if the object was removed successfully.</returns>
-        bool SubRemove(T obj, Vector3 objPos)
+        bool SubRemove(FlockAgent obj, Vector3 objPos)
         {
             bool removed = false;
 
             for (int i = 0; i < objects.Count; i++)
             {
-                if (objects[i].Obj.Equals(obj))
+                if (objects[i].Equals(obj))
                 {
                     removed = objects.Remove(objects[i]);
                     break;
@@ -466,16 +473,16 @@ namespace Octree_Points
         {
             float quarter = SideLength / 4f;
             float newLength = SideLength / 2;
-            children = new PointOctreeNode<T>[8];
-            children[0] = new PointOctreeNode<T>(newLength, minSize, Center + new Vector3(-quarter, quarter, -quarter));
-            children[1] = new PointOctreeNode<T>(newLength, minSize, Center + new Vector3(quarter, quarter, -quarter));
-            children[2] = new PointOctreeNode<T>(newLength, minSize, Center + new Vector3(-quarter, quarter, quarter));
-            children[3] = new PointOctreeNode<T>(newLength, minSize, Center + new Vector3(quarter, quarter, quarter));
+            children = new PointOctreeNode[8];
+            children[0] = new PointOctreeNode(newLength, minSize, Center + new Vector3(-quarter, quarter, -quarter));
+            children[1] = new PointOctreeNode(newLength, minSize, Center + new Vector3(quarter, quarter, -quarter));
+            children[2] = new PointOctreeNode(newLength, minSize, Center + new Vector3(-quarter, quarter, quarter));
+            children[3] = new PointOctreeNode(newLength, minSize, Center + new Vector3(quarter, quarter, quarter));
 
-            children[4] = new PointOctreeNode<T>(newLength, minSize, Center + new Vector3(-quarter, -quarter, -quarter));
-            children[5] = new PointOctreeNode<T>(newLength, minSize, Center + new Vector3(quarter, -quarter, -quarter));
-            children[6] = new PointOctreeNode<T>(newLength, minSize, Center + new Vector3(-quarter, -quarter, quarter));
-            children[7] = new PointOctreeNode<T>(newLength, minSize, Center + new Vector3(quarter, -quarter, quarter));
+            children[4] = new PointOctreeNode(newLength, minSize, Center + new Vector3(-quarter, -quarter, -quarter));
+            children[5] = new PointOctreeNode(newLength, minSize, Center + new Vector3(quarter, -quarter, -quarter));
+            children[6] = new PointOctreeNode(newLength, minSize, Center + new Vector3(-quarter, -quarter, quarter));
+            children[7] = new PointOctreeNode(newLength, minSize, Center + new Vector3(quarter, -quarter, quarter));
         }
 
         /// <summary>
@@ -488,12 +495,11 @@ namespace Octree_Points
             // Note: We know children != null or we wouldn't be merging
             for (int i = 0; i < 8; i++)
             {
-                PointOctreeNode<T> curChild = children[i];
+                PointOctreeNode curChild = children[i];
                 int numObjects = curChild.objects.Count;
                 for (int j = numObjects - 1; j >= 0; j--)
                 {
-                    OctreeObject curObj = curChild.objects[j];
-                    objects.Add(curObj);
+                    objects.Add(curChild.objects[j]);
                 }
             }
             // Remove the child nodes (and the objects in them - they've been added elsewhere now)
@@ -520,7 +526,7 @@ namespace Octree_Points
             int totalObjects = objects.Count;
             if (children != null)
             {
-                foreach (PointOctreeNode<T> child in children)
+                foreach (PointOctreeNode child in children)
                 {
                     if (child.children != null)
                     {
@@ -605,9 +611,9 @@ namespace Octree_Points
             float tintVal = SideLength / 20;
             Gizmos.color = new Color(0, 1.0f - tintVal, tintVal, 0.25f);
 
-            foreach (OctreeObject obj in objects)
+            foreach (FlockAgent obj in objects)
             {
-                Gizmos.DrawIcon(obj.Pos, "marker.tif", true);
+                Gizmos.DrawIcon(obj.Position, "marker.tif", true);
             }
 
             if (children != null)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using CrowdSimulation_OT_OOP;
 using UnityEngine;
 using UnityEngine.Profiling;
 
@@ -19,13 +20,13 @@ namespace Octree_Points
     // Originally written for my game Scraps (http://www.scrapsgame.com) but intended to be general-purpose.
     // Copyright 2014 Nition, BSD licence (see LICENCE file). www.momentstudio.co.nz
     // Unity-based, but could be adapted to work in pure C#
-    public class PointOctree<T>
+    public class PointOctree
     {
         // The total amount of objects currently in the tree
         public int Count { get; private set; }
 
         // Root node of the octree
-        PointOctreeNode<T> rootNode;
+        public PointOctreeNode rootNode;
 
         // Size that the octree was on creation
         readonly float initialSize;
@@ -49,7 +50,7 @@ namespace Octree_Points
             Count = 0;
             initialSize = initialWorldSize;
             minSize = minNodeSize;
-            rootNode = new PointOctreeNode<T>(initialSize, minSize, initialWorldPos);
+            rootNode = new PointOctreeNode(initialSize, minSize, initialWorldPos);
         }
 
         // #### PUBLIC METHODS ####
@@ -59,7 +60,7 @@ namespace Octree_Points
         /// </summary>
         /// <param name="obj">Object to add.</param>
         /// <param name="objPos">Position of the object.</param>
-        public void Add(T obj, Vector3 objPos)
+        public void Add(FlockAgent obj, Vector3 objPos)
         {
             // Add object or expand the octree until it can be added
             int count = 0; // Safety check against infinite/excessive growth
@@ -75,7 +76,7 @@ namespace Octree_Points
             Count++;
         }
 
-        public void Clear(List<T> objects)
+        public void Clear(List<FlockAgent> objects)
         {
             for (int i = 0; i < objects.Count; i++)
             {
@@ -88,7 +89,7 @@ namespace Octree_Points
         /// </summary>
         /// <param name="obj">Object to remove.</param>
         /// <returns>True if the object was removed successfully.</returns>
-        public bool Remove(T obj)
+        public bool Remove(FlockAgent obj)
         {
             bool removed = rootNode.Remove(obj);
 
@@ -108,7 +109,7 @@ namespace Octree_Points
         /// <param name="obj">Object to remove.</param>
         /// <param name="objPos">Position of the object.</param>
         /// <returns>True if the object was removed successfully.</returns>
-        public bool Remove(T obj, Vector3 objPos)
+        public bool Remove(FlockAgent obj, Vector3 objPos)
         {
             bool removed = rootNode.Remove(obj, objPos);
 
@@ -131,10 +132,10 @@ namespace Octree_Points
         /// <param name="maxDistance">Maximum distance from the ray to consider</param>
         /// <param name="nearBy">Pre-initialized list to populate</param>
         /// <returns>True if items are found, false if not</returns>
-        public bool GetNearbyNonAlloc(Ray ray, float maxDistance, List<T> nearBy)
+        public bool GetNearbyNonAlloc(FlockAgent agent, Ray ray, float maxDistance, float avoidance, List<FlockAgent> nearBy)
         {
             nearBy.Clear();
-            rootNode.GetNearby(ref ray, maxDistance, nearBy);
+            rootNode.GetNearby(agent, ref ray, maxDistance, avoidance, nearBy);
             if (nearBy.Count > 0)
                 return true;
             return false;
@@ -147,13 +148,10 @@ namespace Octree_Points
         /// <param name="maxDistance">Maximum distance from the position to consider</param>
         /// <param name="nearBy">Pre-initialized list to populate</param>
         /// <returns>True if items are found, false if not</returns>
-        public bool GetNearbyNonAlloc(Vector3 position, float maxDistance, List<T> nearBy)
+        public bool GetNearbyNonAlloc(FlockAgent agent, Vector3 position, float maxDistance, float avoidance)
         {
-            nearBy.Clear();
-            rootNode.GetNearby(ref position, maxDistance, nearBy);
-            if (nearBy.Count > 0)
-                return true;
-            return false;
+            rootNode.GetNearby(agent, ref position, maxDistance, avoidance);
+            return true;
         }
 
         /// <summary>
@@ -163,10 +161,10 @@ namespace Octree_Points
         /// <param name="ray">The ray. Passing as ref to improve performance since it won't have to be copied.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
         /// <returns>Objects within range.</returns>
-        public T[] GetNearby(Ray ray, float maxDistance)
+        public FlockAgent[] GetNearby(FlockAgent agent, Ray ray, float maxDistance, float avoidance)
         {
-            List<T> collidingWith = new List<T>();
-            rootNode.GetNearby(ref ray, maxDistance, collidingWith);
+            List<FlockAgent> collidingWith = new List<FlockAgent>();
+            rootNode.GetNearby(agent, ref ray, maxDistance, avoidance, collidingWith);
             return collidingWith.ToArray();
         }
 
@@ -177,16 +175,14 @@ namespace Octree_Points
         /// <param name="position">The position. Passing as ref to improve performance since it won't have to be copied.</param>
         /// <param name="maxDistance">Maximum distance from the position to consider.</param>
         /// <returns>Objects within range.</returns>
-        public T[] GetNearbyToArray(Vector3 position, float maxDistance)
-        {
-            return GetNearby(position, maxDistance).ToArray();
-        }
+        // public FlockAgent[] GetNearbyToArray(FlockAgent agent, Vector3 position, float maxDistance, float avoidance)
+        // {
+        //     return GetNearby(agent, position, maxDistance, avoidance).ToArray();
+        // }
 
-        public List<T> GetNearby(Vector3 position, float maxDistance)
+        public void GetNearby(FlockAgent agent, Vector3 position, float maxDistance, float avoidance)
         {
-            List<T> collidingWith = new List<T>();
-            rootNode.GetNearby(ref position, maxDistance, collidingWith);
-            return collidingWith;
+            rootNode.GetNearby(agent, ref position, maxDistance, avoidance);
         }
         #endregion
 
@@ -195,9 +191,9 @@ namespace Octree_Points
         /// If none, returns an empty array (not null).
         /// </summary>
         /// <returns>All objects.</returns>
-        public ICollection<T> GetAll()
+        public ICollection<FlockAgent> GetAll()
         {
-            List<T> objects = new List<T>(Count);
+            List<FlockAgent> objects = new List<FlockAgent>(Count);
             rootNode.GetAll(objects);
             return objects;
         }
@@ -213,19 +209,19 @@ namespace Octree_Points
             int xDirection = direction.x >= 0 ? 1 : -1;
             int yDirection = direction.y >= 0 ? 1 : -1;
             int zDirection = direction.z >= 0 ? 1 : -1;
-            PointOctreeNode<T> oldRoot = rootNode;
+            PointOctreeNode oldRoot = rootNode;
             float half = rootNode.SideLength / 2;
             float newLength = rootNode.SideLength * 2;
             Vector3 newCenter = rootNode.Center + new Vector3(xDirection * half, yDirection * half, zDirection * half);
 
             // Create a new, bigger octree root node
-            rootNode = new PointOctreeNode<T>(newLength, minSize, newCenter);
+            rootNode = new PointOctreeNode(newLength, minSize, newCenter);
 
             if (oldRoot.HasAnyObjects())
             {
                 // Create 7 new octree children to go with the old root as children of the new root
                 int rootPos = rootNode.BestFitChild(oldRoot.Center);
-                PointOctreeNode<T>[] children = new PointOctreeNode<T>[8];
+                PointOctreeNode[] children = new PointOctreeNode[8];
                 for (int i = 0; i < 8; i++)
                 {
                     if (i == rootPos)
@@ -237,7 +233,7 @@ namespace Octree_Points
                         xDirection = i % 2 == 0 ? -1 : 1;
                         yDirection = i > 3 ? -1 : 1;
                         zDirection = (i < 2 || (i > 3 && i < 6)) ? -1 : 1;
-                        children[i] = new PointOctreeNode<T>(oldRoot.SideLength, minSize, newCenter + new Vector3(xDirection * half, yDirection * half, zDirection * half));
+                        children[i] = new PointOctreeNode(oldRoot.SideLength, minSize, newCenter + new Vector3(xDirection * half, yDirection * half, zDirection * half));
                     }
                 }
 

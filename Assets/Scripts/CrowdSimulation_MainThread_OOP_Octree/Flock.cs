@@ -13,7 +13,7 @@ namespace CrowdSimulation_OT_OOP
         //public static ProfilerCounterValue<int> frameCounter = new ProfilerCounterValue<int>("FrameCounter", ProfilerMarkerDataUnit.Count);
         public List<FlockAgent> Agents = new List<FlockAgent>();
 
-        public PointOctree<FlockAgent> Octree;
+        public PointOctree Octree;
 
         [Header("Octree_Settings"), Space()]
         public float Size = 20f;
@@ -26,7 +26,7 @@ namespace CrowdSimulation_OT_OOP
         private void Awake()
         {
             Instance = this;
-            Octree = new PointOctree<FlockAgent>(Size, transform.position, MinNodeSize);
+            Octree = new PointOctree(Size, transform.position, MinNodeSize);
         }
 
         private void Update()
@@ -41,12 +41,16 @@ namespace CrowdSimulation_OT_OOP
             //Fetch neighbors for each agent
             //Proceed with operations
 
-            for (int i = 0; i < numAgents; i++)
-            {
-                Octree.Remove(Agents[i]);
-                Octree.Add(Agents[i], Agents[i].Position);
-            }
+            //for (int i = 0; i < numAgents; i++)
+            //{
+            //    Octree.Remove(Agents[i]);
+            //    Octree.Add(Agents[i], Agents[i].Position);
+            //}
 
+            Octree = new PointOctree(Size, transform.position, MinNodeSize);
+
+            for(int i = 0; i < numAgents; i++)
+                Octree.Add(Agents[i], Agents[i].Position);
 
             for (int i = 0; i < numAgents; i++)
             {
@@ -55,23 +59,23 @@ namespace CrowdSimulation_OT_OOP
                 agentA.CenterOfFlockmates = Vector3.zero;
                 agentA.AvgAvoidanceHeading = Vector3.zero;
 
-                FlockAgent[] flockNeighbors = Octree.GetNearbyToArray(agentA.Position, PerceptionRadius);
+                Octree.GetNearby(agentA, agentA.Position, PerceptionRadius, AvoidanceRadius);
 
-                for (int j = 0; j < flockNeighbors.Length; j++)
-                {
-                    FlockAgent agentB = flockNeighbors[j];
+                // for (int j = 0; j < flockNeighbors.Length; j++)
+                // {
+                //     FlockAgent agentB = flockNeighbors[j];
 
-                    if (agentA == agentB) continue;
+                //     if (agentA == agentB) continue;
 
-                    Vector3 offset = agentB.Position - agentA.Position;
-                    float sqrDistance = offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
+                //     Vector3 offset = agentB.Position - agentA.Position;
+                //     float sqrDistance = offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
 
-                    agentA.AvgFlockHeading += agentB.Forward;
-                    agentA.CenterOfFlockmates += agentB.Position;
+                //     agentA.AvgFlockHeading += agentB.Forward;
+                //     agentA.CenterOfFlockmates += agentB.Position;
 
-                    if (sqrDistance < AvoidanceRadius * AvoidanceRadius)
-                        agentA.AvgAvoidanceHeading -= offset / sqrDistance;
-                }
+                //     if (sqrDistance < AvoidanceRadius * AvoidanceRadius)
+                //         agentA.AvgAvoidanceHeading -= offset / sqrDistance;
+                // }
                                
                 agentA.UpdateVelocity();
             }
@@ -85,8 +89,8 @@ namespace CrowdSimulation_OT_OOP
             if (!Application.isPlaying)
                 Gizmos.DrawWireCube(transform.position, Vector3.one * Size);
 
-            if (Octree != null)
-                Octree.DrawAllBounds();
+            //if (Octree != null)
+            //    Octree.DrawAllBounds();
         }
     }
 }
