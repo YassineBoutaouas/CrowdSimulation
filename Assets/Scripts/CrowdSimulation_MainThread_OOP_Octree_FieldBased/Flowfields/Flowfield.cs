@@ -5,7 +5,6 @@ using UnityEngine.AI;
 
 namespace Flowfield
 {
-
     public class Flowfield
     {
         public Cell[,] Grid { get; private set; }
@@ -47,13 +46,19 @@ namespace Flowfield
                 for (int y = 0; y < GridSize.y; y++)
                 {
                     if (!NavMesh.SamplePosition(Grid[x, y].WorldPosition, out NavMeshHit _, CellRadius * 1.5f, NavMesh.AllAreas))
-                        Grid[x, y].IncreaseCost(255);
+                        Grid[x, y].SetCost(255);
+                    else
+                        Grid[x, y].SetCost(1);
                 }
             }
         }
 
         public void CreateIntegrationField(Cell destination)
         {
+            foreach(Cell c in Grid){
+                c.BestCost = ushort.MaxValue;
+            }
+
             Destination = destination;
 
             Destination.Cost = 0;
@@ -74,6 +79,25 @@ namespace Flowfield
                     {
                         currNeighbor.BestCost = (ushort)(currNeighbor.Cost + currCell.BestCost);
                         cellsToCheck.Enqueue(currNeighbor);
+                    }
+                }
+            }
+        }
+
+        public void CreateFlowField()
+        {
+            foreach (Cell c in Grid)
+            {
+                List<Cell> neighbors = GetNeighborCells(c.GridIndex, GridDirection.AllDirections);
+
+                int bestCost = c.BestCost;
+
+                foreach (Cell n in neighbors)
+                {
+                    if (n.BestCost < bestCost)
+                    {
+                        bestCost = n.BestCost;
+                        c.BestDirection = GridDirection.GetDirection(n.GridIndex - c.GridIndex);
                     }
                 }
             }
@@ -131,6 +155,26 @@ namespace Flowfield
         public static float Remap(this float value, float from1, float to1, float from2, float to2)
         {
             return (value - from1) / (to1 - from1) * (to2 - from2) + from2;
+        }
+
+        public static void DebugDrawArrow(Vector3 pos, Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
+        {
+            Debug.DrawRay(pos, direction);
+
+            Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 + arrowHeadAngle, 0) * new Vector3(0, 0, 1);
+            Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 - arrowHeadAngle, 0) * new Vector3(0, 0, 1);
+            Debug.DrawRay(pos + direction, right * arrowHeadLength);
+            Debug.DrawRay(pos + direction, left * arrowHeadLength);
+        }
+
+        public static void GizmosDrawArrow(Vector3 pos, Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
+        {
+            Gizmos.DrawRay(pos, direction);
+
+            Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 + arrowHeadAngle, 0) * new Vector3(0, 0, 1);
+            Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 - arrowHeadAngle, 0) * new Vector3(0, 0, 1);
+            Gizmos.DrawRay(pos + Vector3.up + direction, right * arrowHeadLength);
+            Gizmos.DrawRay(pos + Vector3.up + direction, left * arrowHeadLength);
         }
     }
 }

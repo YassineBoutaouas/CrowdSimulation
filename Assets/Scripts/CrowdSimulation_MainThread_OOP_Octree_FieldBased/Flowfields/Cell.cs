@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace Flowfield
 {
-
     public class Cell
     {
         public Vector3 WorldPosition;
@@ -13,19 +12,22 @@ namespace Flowfield
         public byte Cost;
         public ushort BestCost;
 
+        public GridDirection BestDirection;
+
         public Cell(Vector3 worldPos, Vector2Int gridPos)
         {
             WorldPosition = worldPos;
             GridIndex = gridPos;
             Cost = 1;
             BestCost = ushort.MaxValue;
+            BestDirection = GridDirection.None;
         }
 
-        public void IncreaseCost(int amount)
+        public void SetCost(int amount)
         {
             if(Cost == byte.MaxValue) return;
 
-            Cost = (byte)Mathf.Clamp(amount + Cost, 1, 255);
+            Cost = (byte)Mathf.Clamp(amount, 1, 255);
         }
     }
 }
