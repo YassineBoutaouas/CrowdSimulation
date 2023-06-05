@@ -34,13 +34,14 @@ namespace Flowfield
         {
             CurrentFlowField = new Flowfield(CellRadius, GridSize, transform.position);
             CurrentFlowField.CreateGrid(transform.position);
+            CurrentFlowField.CreateCostField();
         }
 
         private void Update()
         {
             if (Input.GetMouseButtonDown(0))
             {
-                CurrentFlowField.CreateCostField();
+                //CurrentFlowField.CreateCostField();
                 CurrentFlowField.SetDestination(Goal.position);
                 CurrentFlowField.CreateFlowField();
 
