@@ -9,6 +9,7 @@ using UnityEngine.AI;
 using static UnityEditor.PlayerSettings;
 using System;
 using static Codice.CM.Common.CmCallContext;
+using Unity.Profiling;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -20,68 +21,31 @@ namespace Flowfield_DOTS
     {
         public NativeArray<Cell> Grid;
 
+        #region Grid properties
         public int2 GridSize;
         public float CellRadius;
 
-        public bool DebugGrid;
-
         public Transform Goal;
+        #endregion
+
+        public bool DebugGrid;
 
         private float _cellDiameter;
 
         public float3 GridOrigin { get; private set; }
-        public Cell Destination { get; private set; }
+        //public Cell Destination { get; private set; }
 
-        public readonly int2 None = new int2(0, 0);
-        public readonly int2 North = new int2(0, 1);
-        public readonly int2 South = new int2(0, -1);
-        public readonly int2 East = new int2(1, 0);
-        public readonly int2 West = new int2(-1, 0);
+        public GridDirections Directions { get; private set; }
 
-        public readonly int2 NorthEast = new int2(1, 1);
-        public readonly int2 NorthWest = new int2(-1, 1);
-        public readonly int2 SouthEast = new int2(1, -1);
-        public readonly int2 SouthWest = new int2(-1, -1);
-
-        public NativeArray<int2> CardinalDirections;
-        public NativeArray<int2> CardinalAndInterCardinalDirections;
-        public NativeArray<int2> AllDirections;
+        private ProfilerMarker _profilerMarker;
 
         private void Awake()
         {
             GridOrigin = new float3(transform.position.x - GridSize.x * CellRadius, transform.position.y, transform.position.z - GridSize.y * CellRadius);
             _cellDiameter = CellRadius * 2;
 
-            CardinalDirections = new NativeArray<int2>(4, Allocator.Persistent)
-            {
-                [0] = North,
-                [1] = East,
-                [2] = South,
-                [3] = West
-            };
-            CardinalAndInterCardinalDirections = new NativeArray<int2>(8, Allocator.Persistent)
-            {
-                [0] = North,
-                [1] = NorthEast,
-                [2] = East,
-                [3] = SouthEast,
-                [4] = South,
-                [5] = SouthWest,
-                [6] = West,
-                [7] = NorthWest
-            };
-            AllDirections = new NativeArray<int2>(9, Allocator.Persistent)
-            {
-                [0] = None,
-                [1] = North,
-                [2] = NorthEast,
-                [3] = East,
-                [4] = SouthEast,
-                [5] = South,
-                [6] = SouthWest,
-                [7] = West,
-                [8] = NorthWest
-            };
+            Directions = new GridDirections(0);
+            _profilerMarker = new ProfilerMarker("Flowfield.Create");
 
             CreateGrid();
 
@@ -117,7 +81,7 @@ namespace Flowfield_DOTS
         {
             JobHandle jobHandle;
 
-            CreateFlowFieldJob createFlowField = new CreateFlowFieldJob(Grid, GridSize, GridOrigin, CellRadius, Goal.position, CardinalDirections, CardinalAndInterCardinalDirections, AllDirections);
+            CreateFlowFieldJob createFlowField = new CreateFlowFieldJob(Grid, GridSize, GridOrigin, CellRadius, Goal.position, Directions, _profilerMarker);
 
             jobHandle = createFlowField.Schedule();
 
@@ -151,7 +115,8 @@ namespace Flowfield_DOTS
                     if (Grid.IsCreated && Grid.Length > 0)
                     {
                         //Handles.Label(Grid[totalIndex].WorldPosition, Grid[totalIndex].Cost.ToString(), style);
-                        Handles.Label(Grid[totalIndex].WorldPosition, Grid[totalIndex].BestCost.ToString(), style);
+                        //Handles.Label(Grid[totalIndex].WorldPosition, Grid[totalIndex].BestCost.ToString(), style);
+                        //FlowFieldExtensions.GizmosDrawArrow(Grid[totalIndex].WorldPosition, new Vector3(Grid[totalIndex].BestDirection.x, 0, Grid[totalIndex].BestDirection.y));
 
                         Gizmos.color = Grid[totalIndex].Cost == 255 ? Color.red : Color.white;
                     }
@@ -161,6 +126,69 @@ namespace Flowfield_DOTS
             }
         }
 #endif
+    }
+
+    public struct GridDirections
+    {
+        public int2 None;
+        public int2 North;
+        public int2 South;
+        public int2 East;
+        public int2 West;
+
+        public int2 NorthEast;
+        public int2 NorthWest;
+        public int2 SouthEast;
+        public int2 SouthWest;
+
+        public NativeArray<int2> CardinalDirections;
+        public NativeArray<int2> CardinalAndInterCardinalDirections;
+        public NativeArray<int2> AllDirections;
+
+        public GridDirections(int i)
+        {
+            None = new int2(0, 0);
+            North = new int2(0, 1);
+            South = new int2(0, -1);
+            East = new int2(1, 0);
+            West = new int2(-1, 0);
+
+            NorthEast = new int2(1, 1);
+            NorthWest = new int2(-1, 1);
+            SouthEast = new int2(1, -1);
+            SouthWest = new int2(-1, -1);
+
+            CardinalDirections = new NativeArray<int2>(4, Allocator.Persistent)
+            {
+                [0] = North,
+                [1] = East,
+                [2] = South,
+                [3] = West
+            };
+            CardinalAndInterCardinalDirections = new NativeArray<int2>(8, Allocator.Persistent)
+            {
+                [0] = North,
+                [1] = NorthEast,
+                [2] = East,
+                [3] = SouthEast,
+                [4] = South,
+                [5] = SouthWest,
+                [6] = West,
+                [7] = NorthWest
+            };
+            AllDirections = new NativeArray<int2>(9, Allocator.Persistent)
+            {
+                [0] = None,
+                [1] = North,
+                [2] = NorthEast,
+                [3] = East,
+                [4] = SouthEast,
+                [5] = South,
+                [6] = SouthWest,
+                [7] = West,
+                [8] = NorthWest
+            };
+        }
     }
 
     [BurstCompile]
@@ -230,13 +258,13 @@ namespace Flowfield_DOTS
 
         public float3 Destination;
 
-        public NativeArray<int2> CardinalDirections;
-        public NativeArray<int2> CardinalAndInterCardinalDirections;
-        public NativeArray<int2> AllDirections;
+        public GridDirections Directions;
 
         public int2 InvalidDirection;
 
-        public CreateFlowFieldJob(NativeArray<Cell> gridCells, int2 gridSize, float3 gridOrigin, float cellRadius, float3 destination, NativeArray<int2> cardinalDirections, NativeArray<int2> cardinalAndInterCardinalDirections, NativeArray<int2> allDirections)
+        public ProfilerMarker profilerMarker;
+
+        public CreateFlowFieldJob(NativeArray<Cell> gridCells, int2 gridSize, float3 gridOrigin, float cellRadius, float3 destination, GridDirections directions, ProfilerMarker marker)
         {
             Grid = gridCells;
             GridSize = gridSize;
@@ -245,21 +273,22 @@ namespace Flowfield_DOTS
             CellDiameter = cellRadius * 2;
             Destination = destination;
 
-            CardinalDirections = cardinalDirections;
-            CardinalAndInterCardinalDirections = cardinalAndInterCardinalDirections;
-            AllDirections = allDirections;
+            Directions = directions;
             InvalidDirection = new int2(-1, -1);
+
+            profilerMarker = marker;
         }
 
         [BurstCompile]
         public void Execute()
         {
             CreateIntegrationField();
-            //CreateFlowField();
+            CreateFlowField();
         }
 
         public void CreateIntegrationField()
         {
+
             Cell destinationCell = GetCellFromWorldPosition(Destination, out int2 destinationCellIndex);
 
             destinationCell.Cost = 0;
@@ -276,7 +305,7 @@ namespace Flowfield_DOTS
                 int2 currentCellIndex = cellsToCheck.Dequeue();
                 int currentCelltotalIndex = currentCellIndex.x.CalculateFlatIndex(currentCellIndex.y, GridSize.x);
 
-                NativeList<Cell> currentNeighbors = GetNeighborCells(currentCellIndex, CardinalDirections);
+                NativeList<Cell> currentNeighbors = GetNeighborCells(currentCellIndex, Directions.CardinalDirections);
 
                 for (int i = 0; i < currentNeighbors.Length; i++)
                 {
@@ -306,10 +335,11 @@ namespace Flowfield_DOTS
             {
                 Cell cell = Grid[i];
 
-                NativeList<Cell> neighbors = GetNeighborCells(cell.GridIndex, AllDirections);
+                NativeList<Cell> neighbors = GetNeighborCells(cell.GridIndex, Directions.AllDirections);
 
                 int bestCost = cell.BestCost;
 
+                //get lowest cost cell - could be done through priority queue
                 foreach (Cell neighbor in neighbors)
                 {
                     if (neighbor.BestCost < bestCost)
@@ -327,13 +357,13 @@ namespace Flowfield_DOTS
 
         public int2 GetDirection(int2 vector)
         {
-            for (int i = 0; i < CardinalAndInterCardinalDirections.Length; i++)
+            for (int i = 0; i < Directions.CardinalAndInterCardinalDirections.Length; i++)
             {
-                if (vector.Equals(CardinalAndInterCardinalDirections[i]))
-                    return CardinalAndInterCardinalDirections[i];
+                if (vector.Equals(Directions.CardinalAndInterCardinalDirections[i]))
+                    return Directions.CardinalAndInterCardinalDirections[i];
             }
 
-            return AllDirections[0];
+            return Directions.AllDirections[0];
         }
 
         public NativeList<Cell> GetNeighborCells(int2 gridIndex, NativeArray<int2> gridDirections)
@@ -393,6 +423,16 @@ namespace Flowfield_DOTS
         public static int CalculateFlatIndex(this int itemIndex, int listIndex, int gridWidth)
         {
             return itemIndex + listIndex * gridWidth;
+        }
+
+        public static void GizmosDrawArrow(Vector3 pos, Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
+        {
+            Gizmos.DrawRay(pos, direction);
+
+            Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 + arrowHeadAngle, 0) * Vector3.forward;
+            Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 - arrowHeadAngle, 0) * Vector3.forward;
+            Gizmos.DrawRay(pos + Vector3.up + direction, right * arrowHeadLength);
+            Gizmos.DrawRay(pos + Vector3.up + direction, left * arrowHeadLength);
         }
     }
 }
