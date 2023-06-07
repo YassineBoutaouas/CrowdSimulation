@@ -351,6 +351,7 @@ namespace Flowfield_DOTS
                 NativeList<Cell> neighbors = GetNeighborCells(cell.GridIndex, Directions.AllDirections);
 
                 int bestCost = cell.BestCost;
+                int2 lowestCostIndex = cell.GridIndex;
 
                 //get lowest cost cell - could be done through priority queue
                 foreach (Cell neighbor in neighbors)
@@ -358,9 +359,11 @@ namespace Flowfield_DOTS
                     if (neighbor.BestCost < bestCost)
                     {
                         bestCost = neighbor.BestCost;
-                        cell.BestDirection = GetDirection(neighbor.GridIndex - cell.GridIndex);
+                        lowestCostIndex = neighbor.GridIndex;
                     }
                 }
+
+                cell.BestDirection = GetDirection(lowestCostIndex - cell.GridIndex); //only has to be calculated once really
 
                 Grid[i] = cell;
 
