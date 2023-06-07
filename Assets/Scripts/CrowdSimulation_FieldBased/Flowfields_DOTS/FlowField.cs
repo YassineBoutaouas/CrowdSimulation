@@ -161,226 +161,225 @@ namespace Flowfield_DOTS
             }
         }
 #endif
+    }
 
-        [BurstCompile]
-        private struct GetCellFromWorldPositionJob : IJob, IDisposable
+    [BurstCompile]
+    public struct GetCellFromWorldPositionJob : IJob, IDisposable
+    {
+        public NativeArray<Cell> Grid;
+        public int2 GridSize;
+        public float3 GridOrigin;
+
+        public float CellRadius;
+        public float CellDiameter;
+
+        public float3 Destination;
+        public NativeArray<int> TargetDirection;
+
+        public GetCellFromWorldPositionJob(NativeArray<Cell> gridCells, int2 gridSize, float3 gridOrigin, float cellRadius, float3 destination)
         {
-            public NativeArray<Cell> Grid;
-            public int2 GridSize;
-            public float3 GridOrigin;
+            Grid = gridCells;
+            GridSize = gridSize;
+            GridOrigin = gridOrigin;
+            CellRadius = cellRadius;
+            CellDiameter = cellRadius * 2;
+            Destination = destination;
 
-            public float CellRadius;
-            public float CellDiameter;
-
-            public float3 Destination;
-            public NativeArray<int> TargetDirection;
-
-            public GetCellFromWorldPositionJob(NativeArray<Cell> gridCells, int2 gridSize, float3 gridOrigin, float cellRadius, float3 destination)
-            {
-                Grid = gridCells;
-                GridSize = gridSize;
-                GridOrigin = gridOrigin;
-                CellRadius = cellRadius;
-                CellDiameter = cellRadius * 2;
-                Destination = destination;
-
-                TargetDirection = new NativeArray<int>(2, Allocator.TempJob);
-            }
-
-            [BurstCompile]
-            public void Execute()
-            {
-                Cell targetCell = GetCellFromWorldPosition(Destination, out int _);
-                TargetDirection[0] = targetCell.GridIndex.x;
-                TargetDirection[1] = targetCell.GridIndex.y;
-            }
-
-            public Cell GetCellFromWorldPosition(float3 worldPos, out int totalIndex)
-            {
-                float percentX = (worldPos.x) / (GridSize.x * CellDiameter);
-                float percentY = (worldPos.z) / (GridSize.y * CellDiameter);
-
-                percentX = math.clamp(percentX.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
-                percentY = math.clamp(percentY.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
-
-                int x = math.clamp((int)math.floor(GridSize.x * percentX), 0, GridSize.x - 1);
-                int y = math.clamp((int)math.floor(GridSize.y * percentY), 0, GridSize.y - 1);
-
-                totalIndex = x.CalculateFlatIndex(y, GridSize.x);
-
-                return Grid[totalIndex];
-            }
-
-            public void Dispose()
-            {
-                return;
-            }
+            TargetDirection = new NativeArray<int>(2, Allocator.TempJob);
         }
 
         [BurstCompile]
-        private struct CreateFlowFieldJob : IJob, IDisposable
+        public void Execute()
         {
-            public NativeArray<Cell> Grid;
-            public int2 GridSize;
-            public float3 GridOrigin;
+            Cell targetCell = GetCellFromWorldPosition(Destination, out int _);
+            TargetDirection[0] = targetCell.GridIndex.x;
+            TargetDirection[1] = targetCell.GridIndex.y;
+        }
 
-            public float CellRadius;
-            public float CellDiameter;
+        public Cell GetCellFromWorldPosition(float3 worldPos, out int totalIndex)
+        {
+            float percentX = (worldPos.x) / (GridSize.x * CellDiameter);
+            float percentY = (worldPos.z) / (GridSize.y * CellDiameter);
 
-            public float3 Destination;
+            percentX = math.clamp(percentX.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
+            percentY = math.clamp(percentY.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
 
-            public NativeArray<int2> CardinalDirections;
-            public NativeArray<int2> CardinalAndInterCardinalDirections;
-            public NativeArray<int2> AllDirections;
+            int x = math.clamp((int)math.floor(GridSize.x * percentX), 0, GridSize.x - 1);
+            int y = math.clamp((int)math.floor(GridSize.y * percentY), 0, GridSize.y - 1);
 
-            public int2 InvalidDirection;
+            totalIndex = x.CalculateFlatIndex(y, GridSize.x);
 
-            public CreateFlowFieldJob(NativeArray<Cell> gridCells, int2 gridSize, float3 gridOrigin, float cellRadius, float3 destination, NativeArray<int2> cardinalDirections, NativeArray<int2> cardinalAndInterCardinalDirections, NativeArray<int2> allDirections)
+            return Grid[totalIndex];
+        }
+
+        public void Dispose()
+        {
+            return;
+        }
+    }
+
+    [BurstCompile]
+    public struct CreateFlowFieldJob : IJob, IDisposable
+    {
+        public NativeArray<Cell> Grid;
+        public int2 GridSize;
+        public float3 GridOrigin;
+
+        public float CellRadius;
+        public float CellDiameter;
+
+        public float3 Destination;
+
+        public NativeArray<int2> CardinalDirections;
+        public NativeArray<int2> CardinalAndInterCardinalDirections;
+        public NativeArray<int2> AllDirections;
+
+        public int2 InvalidDirection;
+
+        public CreateFlowFieldJob(NativeArray<Cell> gridCells, int2 gridSize, float3 gridOrigin, float cellRadius, float3 destination, NativeArray<int2> cardinalDirections, NativeArray<int2> cardinalAndInterCardinalDirections, NativeArray<int2> allDirections)
+        {
+            Grid = gridCells;
+            GridSize = gridSize;
+            GridOrigin = gridOrigin;
+            CellRadius = cellRadius;
+            CellDiameter = cellRadius * 2;
+            Destination = destination;
+
+            CardinalDirections = cardinalDirections;
+            CardinalAndInterCardinalDirections = cardinalAndInterCardinalDirections;
+            AllDirections = allDirections;
+            InvalidDirection = new int2(-1, -1);
+        }
+
+        [BurstCompile]
+        public void Execute()
+        {
+            CreateIntegrationField();
+            //CreateFlowField();
+        }
+
+        public void CreateIntegrationField()
+        {
+            Cell destinationCell = GetCellFromWorldPosition(Destination, out int2 destinationCellIndex);
+
+            destinationCell.Cost = 0;
+            destinationCell.BestCost = 0;
+
+            Grid[destinationCellIndex.x.CalculateFlatIndex(destinationCellIndex.y, GridSize.x)] = destinationCell;
+
+            NativeQueue<int2> cellsToCheck = new NativeQueue<int2>(Allocator.TempJob);
+
+            cellsToCheck.Enqueue(destinationCellIndex);
+
+            while (cellsToCheck.Count > 0)
             {
-                Grid = gridCells;
-                GridSize = gridSize;
-                GridOrigin = gridOrigin;
-                CellRadius = cellRadius;
-                CellDiameter = cellRadius * 2;
-                Destination = destination;
+                int2 currentCellIndex = cellsToCheck.Dequeue();
+                int currentCelltotalIndex = currentCellIndex.x.CalculateFlatIndex(currentCellIndex.y, GridSize.x);
 
-                CardinalDirections = cardinalDirections;
-                CardinalAndInterCardinalDirections = cardinalAndInterCardinalDirections;
-                AllDirections = allDirections;
-                InvalidDirection = new int2(-1, -1);
-            }
+                NativeList<Cell> currentNeighbors = GetNeighborCells(currentCellIndex, CardinalDirections);
 
-            [BurstCompile]
-            public void Execute()
-            {
-                CreateIntegrationField();
-                //CreateFlowField();
-            }
-
-            public void CreateIntegrationField()
-            {
-                Cell destinationCell = GetCellFromWorldPosition(Destination, out int2 destinationCellIndex);
-
-                destinationCell.Cost = 0;
-                destinationCell.BestCost = 0;
-
-                Grid[destinationCellIndex.x.CalculateFlatIndex(destinationCellIndex.y, GridSize.x)] = destinationCell;
-
-                NativeQueue<int2> cellsToCheck = new NativeQueue<int2>(Allocator.TempJob);
-
-                cellsToCheck.Enqueue(destinationCellIndex);
-
-                while (cellsToCheck.Count > 0)
+                for (int i = 0; i < currentNeighbors.Length; i++)
                 {
-                    int2 currentCellIndex = cellsToCheck.Dequeue();
-                    int currentCelltotalIndex = currentCellIndex.x.CalculateFlatIndex(currentCellIndex.y, GridSize.x);
+                    Cell currNeighbor = currentNeighbors[i];
 
-                    NativeList<Cell> currentNeighbors = GetNeighborCells(currentCellIndex, CardinalDirections);
-
-                    for (int i = 0; i < currentNeighbors.Length; i++)
+                    if (currNeighbor.Cost == byte.MaxValue) continue;
+                    if (currNeighbor.Cost + Grid[currentCelltotalIndex].BestCost < currNeighbor.BestCost)
                     {
-                        Cell currNeighbor = currentNeighbors[i];
-                        int currentNeighborIndex = currNeighbor.GridIndex.x.CalculateFlatIndex(currNeighbor.GridIndex.y, GridSize.x);
+                        currNeighbor.BestCost = (ushort)(currNeighbor.Cost + Grid[currentCelltotalIndex].BestCost);
 
-                        if (Grid[currentNeighborIndex].Cost == byte.MaxValue) continue;
-                        if (Grid[currentNeighborIndex].Cost + Grid[currentCelltotalIndex].BestCost < Grid[currentNeighborIndex].BestCost)
-                        {
-                            currNeighbor.BestCost = (ushort)(Grid[currentNeighborIndex].Cost + Grid[currentCelltotalIndex].BestCost);
+                        currentNeighbors[i] = currNeighbor;
+                        Grid[currNeighbor.GridIndex.x.CalculateFlatIndex(currNeighbor.GridIndex.y, GridSize.x)] = currNeighbor;
 
-                            currentNeighbors[i] = currNeighbor;
-                            Grid[currentNeighborIndex] = currNeighbor;
-
-                            cellsToCheck.Enqueue(currentNeighbors[i].GridIndex);
-                        }
+                        cellsToCheck.Enqueue(currentNeighbors[i].GridIndex);
                     }
-
-                    currentNeighbors.Dispose();
                 }
 
-                cellsToCheck.Dispose();
+                currentNeighbors.Dispose();
             }
 
-            public void CreateFlowField()
+            cellsToCheck.Dispose();
+        }
+
+        public void CreateFlowField()
+        {
+            for (int i = 0; i < Grid.Length; i++)
             {
-                for (int i = 0; i < Grid.Length; i++)
+                Cell cell = Grid[i];
+
+                NativeList<Cell> neighbors = GetNeighborCells(cell.GridIndex, AllDirections);
+
+                int bestCost = cell.BestCost;
+
+                foreach (Cell neighbor in neighbors)
                 {
-                    Cell cell = Grid[i];
-
-                    NativeList<Cell> neighbors = GetNeighborCells(cell.GridIndex, AllDirections);
-
-                    int bestCost = cell.BestCost;
-
-                    foreach (Cell neighbor in neighbors)
+                    if (neighbor.BestCost < bestCost)
                     {
-                        if (neighbor.BestCost < bestCost)
-                        {
-                            bestCost = neighbor.BestCost;
-                            cell.BestDirection = GetDirection(neighbor.GridIndex - cell.GridIndex);
-                        }
+                        bestCost = neighbor.BestCost;
+                        cell.BestDirection = GetDirection(neighbor.GridIndex - cell.GridIndex);
                     }
-
-                    Grid[i] = cell;
-
-                    neighbors.Dispose();
-                }
-            }
-
-            public int2 GetDirection(int2 vector)
-            {
-                for (int i = 0; i < CardinalAndInterCardinalDirections.Length; i++)
-                {
-                    if (vector.Equals(CardinalAndInterCardinalDirections[i]))
-                        return CardinalAndInterCardinalDirections[i];
                 }
 
-                return AllDirections[0];
-            }
+                Grid[i] = cell;
 
-            public NativeList<Cell> GetNeighborCells(int2 gridIndex, NativeArray<int2> gridDirections)
+                neighbors.Dispose();
+            }
+        }
+
+        public int2 GetDirection(int2 vector)
+        {
+            for (int i = 0; i < CardinalAndInterCardinalDirections.Length; i++)
             {
-                NativeList<Cell> neighbors = new NativeList<Cell>(Allocator.Temp);
-
-                foreach (int2 currentDir in gridDirections)
-                {
-                    int2 neighborIndex = GetCellAtRelativePos(gridIndex, currentDir);
-
-                    if (!neighborIndex.Equals(InvalidDirection))
-                        neighbors.Add(Grid[neighborIndex.x.CalculateFlatIndex(neighborIndex.y, GridSize.x)]);
-                }
-
-                return neighbors;
+                if (vector.Equals(CardinalAndInterCardinalDirections[i]))
+                    return CardinalAndInterCardinalDirections[i];
             }
 
-            public int2 GetCellAtRelativePos(int2 gridPos, int2 offset)
+            return AllDirections[0];
+        }
+
+        public NativeList<Cell> GetNeighborCells(int2 gridIndex, NativeArray<int2> gridDirections)
+        {
+            NativeList<Cell> neighbors = new NativeList<Cell>(Allocator.Temp);
+
+            foreach (int2 currentDir in gridDirections)
             {
-                int2 finalPos = gridPos + offset;
+                int2 neighborIndex = GetCellAtRelativePos(gridIndex, currentDir);
 
-                if (finalPos.x < 0 || finalPos.x >= GridSize.x || finalPos.y < 0 || finalPos.y >= GridSize.y)
-                    return InvalidDirection;
-
-                return finalPos;
+                if (!neighborIndex.Equals(InvalidDirection))
+                    neighbors.Add(Grid[neighborIndex.x.CalculateFlatIndex(neighborIndex.y, GridSize.x)]);
             }
 
-            public Cell GetCellFromWorldPosition(float3 worldPos, out int2 index)
-            {
-                float percentX = (worldPos.x) / (GridSize.x * CellDiameter);
-                float percentY = (worldPos.z) / (GridSize.y * CellDiameter);
+            return neighbors;
+        }
 
-                percentX = math.clamp(percentX.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
-                percentY = math.clamp(percentY.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
+        public int2 GetCellAtRelativePos(int2 gridPos, int2 offset)
+        {
+            int2 finalPos = gridPos + offset;
 
-                int x = math.clamp((int)math.floor(GridSize.x * percentX), 0, GridSize.x - 1);
-                int y = math.clamp((int)math.floor(GridSize.y * percentY), 0, GridSize.y - 1);
+            if (finalPos.x < 0 || finalPos.x >= GridSize.x || finalPos.y < 0 || finalPos.y >= GridSize.y)
+                return InvalidDirection;
 
-                index = new int2(x, y); // x.CalculateFlatIndex(y, GridSize.x);
+            return finalPos;
+        }
 
-                return Grid[x.CalculateFlatIndex(y, GridSize.x)];
-            }
+        public Cell GetCellFromWorldPosition(float3 worldPos, out int2 index)
+        {
+            float percentX = (worldPos.x) / (GridSize.x * CellDiameter);
+            float percentY = (worldPos.z) / (GridSize.y * CellDiameter);
 
-            public void Dispose()
-            {
-                return;
-            }
+            percentX = math.clamp(percentX.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
+            percentY = math.clamp(percentY.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
+
+            int x = math.clamp((int)math.floor(GridSize.x * percentX), 0, GridSize.x - 1);
+            int y = math.clamp((int)math.floor(GridSize.y * percentY), 0, GridSize.y - 1);
+
+            index = new int2(x, y);
+
+            return Grid[x.CalculateFlatIndex(y, GridSize.x)];
+        }
+
+        public void Dispose()
+        {
+            return;
         }
     }
 
