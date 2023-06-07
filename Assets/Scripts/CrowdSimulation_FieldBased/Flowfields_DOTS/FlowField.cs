@@ -52,6 +52,17 @@ namespace Flowfield_DOTS
             CreateFlowField();
         }
 
+        private void Update()
+        {
+            if (!Input.GetMouseButtonDown(0)) return;
+
+            CreateFlowField();
+
+//#if UNITY_EDITOR
+//            EditorApplication.isPaused = true;
+//#endif
+        }
+
         private void CreateGrid()
         {
             if (Grid.IsCreated) Grid.Dispose();
@@ -282,8 +293,10 @@ namespace Flowfield_DOTS
         [BurstCompile]
         public void Execute()
         {
+            profilerMarker.Begin();
             CreateIntegrationField();
             CreateFlowField();
+            profilerMarker.End();
         }
 
         public void CreateIntegrationField()

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -15,6 +16,8 @@ namespace Flowfield
         public float CellDiameter { get; private set; }
 
         public Cell Destination;
+
+        public ProfilerMarker profilerMarker = new ProfilerMarker("Flowfield.Create");
 
         public Flowfield(float cellRadius, Vector2Int gridSize, Vector3 worldOrigin)
         {

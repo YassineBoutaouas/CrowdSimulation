@@ -42,8 +42,10 @@ namespace Flowfield
             if (Input.GetMouseButtonDown(0))
             {
                 //CurrentFlowField.CreateCostField();
+                CurrentFlowField.profilerMarker.Begin();
                 CurrentFlowField.SetDestination(Goal.position);
                 CurrentFlowField.CreateFlowField();
+                CurrentFlowField.profilerMarker.End();
 
                 Debug.Log("New flowfield");
             }
