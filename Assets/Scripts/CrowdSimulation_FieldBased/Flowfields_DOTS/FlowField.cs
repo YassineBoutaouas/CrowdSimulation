@@ -8,6 +8,7 @@ using Unity.Mathematics;
 using UnityEngine.AI;
 using static UnityEditor.PlayerSettings;
 using System;
+using static Codice.CM.Common.CmCallContext;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -36,6 +37,7 @@ namespace Flowfield_DOTS
         public readonly int2 South = new int2(0, -1);
         public readonly int2 East = new int2(1, 0);
         public readonly int2 West = new int2(-1, 0);
+
         public readonly int2 NorthEast = new int2(1, 1);
         public readonly int2 NorthWest = new int2(-1, 1);
         public readonly int2 SouthEast = new int2(1, -1);
@@ -231,6 +233,8 @@ namespace Flowfield_DOTS
             public NativeArray<int2> CardinalAndInterCardinalDirections;
             public NativeArray<int2> AllDirections;
 
+            public int2 InvalidDirection;
+
             public CreateFlowFieldJob(NativeArray<Cell> gridCells, int2 gridSize, float3 gridOrigin, float cellRadius, float3 destination, NativeArray<int2> cardinalDirections, NativeArray<int2> cardinalAndInterCardinalDirections, NativeArray<int2> allDirections)
             {
                 Grid = gridCells;
@@ -243,6 +247,7 @@ namespace Flowfield_DOTS
                 CardinalDirections = cardinalDirections;
                 CardinalAndInterCardinalDirections = cardinalAndInterCardinalDirections;
                 AllDirections = allDirections;
+                InvalidDirection = new int2(-1, -1);
             }
 
             [BurstCompile]
@@ -254,13 +259,6 @@ namespace Flowfield_DOTS
 
             public void CreateIntegrationField()
             {
-                //for (int i = 0; i < Grid.Length; i++)
-                //{
-                //    Cell cell = Grid[i];
-                //    cell.BestCost = ushort.MaxValue;
-                //    Grid[i] = cell;
-                //}
-
                 Cell destinationCell = GetCellFromWorldPosition(Destination, out int2 destinationCellIndex);
 
                 destinationCell.Cost = 0;
@@ -275,23 +273,27 @@ namespace Flowfield_DOTS
                 while (cellsToCheck.Count > 0)
                 {
                     int2 currentCellIndex = cellsToCheck.Dequeue();
-                    int totalIndex = currentCellIndex.x.CalculateFlatIndex(currentCellIndex.y, GridSize.x);
+                    int currentCelltotalIndex = currentCellIndex.x.CalculateFlatIndex(currentCellIndex.y, GridSize.x);
+
                     NativeList<Cell> currentNeighbors = GetNeighborCells(currentCellIndex, CardinalDirections);
-                
+
                     for (int i = 0; i < currentNeighbors.Length; i++)
                     {
-                        Cell neighbor = currentNeighbors[i];
-                
-                        if (neighbor.Cost == byte.MaxValue) continue;
-                        if (neighbor.Cost + Grid[totalIndex].BestCost < neighbor.BestCost)
+                        Cell currNeighbor = currentNeighbors[i];
+                        int currentNeighborIndex = currNeighbor.GridIndex.x.CalculateFlatIndex(currNeighbor.GridIndex.y, GridSize.x);
+
+                        if (Grid[currentNeighborIndex].Cost == byte.MaxValue) continue;
+                        if (Grid[currentNeighborIndex].Cost + Grid[currentCelltotalIndex].BestCost < Grid[currentNeighborIndex].BestCost)
                         {
-                            neighbor.BestCost = (ushort)(neighbor.Cost + Grid[totalIndex].BestCost);
-                
-                            currentNeighbors[i] = neighbor;
+                            currNeighbor.BestCost = (ushort)(Grid[currentNeighborIndex].Cost + Grid[currentCelltotalIndex].BestCost);
+
+                            currentNeighbors[i] = currNeighbor;
+                            Grid[currentNeighborIndex] = currNeighbor;
+
                             cellsToCheck.Enqueue(currentNeighbors[i].GridIndex);
                         }
                     }
-                
+
                     currentNeighbors.Dispose();
                 }
 
@@ -340,22 +342,23 @@ namespace Flowfield_DOTS
 
                 foreach (int2 currentDir in gridDirections)
                 {
-                    int neighborIndex = GetCellAtRelativePos(gridIndex, currentDir);
-                    if (neighborIndex != -1)
-                        neighbors.Add(Grid[neighborIndex]);
+                    int2 neighborIndex = GetCellAtRelativePos(gridIndex, currentDir);
+
+                    if (!neighborIndex.Equals(InvalidDirection))
+                        neighbors.Add(Grid[neighborIndex.x.CalculateFlatIndex(neighborIndex.y, GridSize.x)]);
                 }
 
                 return neighbors;
             }
 
-            public int GetCellAtRelativePos(int2 gridPos, int2 offset)
+            public int2 GetCellAtRelativePos(int2 gridPos, int2 offset)
             {
                 int2 finalPos = gridPos + offset;
 
                 if (finalPos.x < 0 || finalPos.x >= GridSize.x || finalPos.y < 0 || finalPos.y >= GridSize.y)
-                    return -1;
+                    return InvalidDirection;
 
-                return finalPos.x.CalculateFlatIndex(finalPos.y, GridSize.x);
+                return finalPos;
             }
 
             public Cell GetCellFromWorldPosition(float3 worldPos, out int2 index)
