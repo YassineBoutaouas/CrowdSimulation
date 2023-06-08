@@ -1,18 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine.AI;
-using static UnityEditor.PlayerSettings;
-using System;
-using static Codice.CM.Common.CmCallContext;
 using Unity.Profiling;
+using UnityEngine;
+using UnityEngine.AI;
 
 #if UNITY_EDITOR
-using UnityEditor;
 #endif
 
 namespace Flowfield_DOTS
