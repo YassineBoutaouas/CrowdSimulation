@@ -9,7 +9,6 @@ namespace CrowdSimulation_OOP
     public class Flock : MonoBehaviour
     {
         public static Flock Instance;
-        //public static ProfilerCounterValue<int> frameCounter = new ProfilerCounterValue<int>("FrameCounter", ProfilerMarkerDataUnit.Count);
         public List<FlockAgent> Agents = new List<FlockAgent>();
 
 

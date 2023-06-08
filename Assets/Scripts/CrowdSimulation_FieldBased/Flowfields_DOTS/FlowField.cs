@@ -48,8 +48,6 @@ namespace Flowfield_DOTS
             _profilerMarker = new ProfilerMarker("Flowfield.Create");
 
             CreateGrid();
-
-            CreateFlowField();
         }
 
         private void Update()
@@ -57,10 +55,6 @@ namespace Flowfield_DOTS
             if (!Input.GetMouseButtonDown(0)) return;
 
             CreateFlowField();
-
-//#if UNITY_EDITOR
-//            EditorApplication.isPaused = true;
-//#endif
         }
 
         private void CreateGrid()
