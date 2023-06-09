@@ -9,21 +9,21 @@ namespace ECS_Temp_Testing
     {
         protected override void OnUpdate()
         {
-            EntityQuery playerQuery = EntityManager.CreateEntityQuery(typeof(PlayerTag));
+            //EntityQuery playerQuery = EntityManager.CreateEntityQuery(typeof(PlayerTag));
 
-            PlayerSpawnerComponent playerSpawner = SystemAPI.GetSingleton<PlayerSpawnerComponent>();
-            RefRW<RandomComponent> randomComponent = SystemAPI.GetSingletonRW<RandomComponent>();
+            //PlayerSpawnerComponent playerSpawner = SystemAPI.GetSingleton<PlayerSpawnerComponent>();
+            //RefRW<RandomComponent> randomComponent = SystemAPI.GetSingletonRW<RandomComponent>();
 
-            EntityCommandBuffer entityBuffer = 
-                SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+            //EntityCommandBuffer entityBuffer = 
+            //    SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
 
-            if (playerQuery.CalculateEntityCount() < playerSpawner.SpawnCount)
-            {
-                Entity e = entityBuffer.Instantiate(playerSpawner.entity);
-                //EntityManager.Instantiate(playerSpawner.entity);
+            //if (playerQuery.CalculateEntityCount() < playerSpawner.SpawnCount)
+            //{
+            //    Entity e = entityBuffer.Instantiate(playerSpawner.entity);
+            //    //EntityManager.Instantiate(playerSpawner.entity);
 
-                entityBuffer.SetComponent(e, new Speed { Value = randomComponent.ValueRW.random.NextFloat(2f, 10f) });
-            }
+            //    entityBuffer.SetComponent(e, new Speed { Value = randomComponent.ValueRW.random.NextFloat(2f, 10f) });
+            //}
         }
     }
 }

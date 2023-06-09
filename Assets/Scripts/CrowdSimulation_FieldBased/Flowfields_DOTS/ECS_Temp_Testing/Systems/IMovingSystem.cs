@@ -26,13 +26,13 @@ namespace ECS_Temp_Testing
         [BurstCompile]
         void OnUpdate(ref SystemState state)
         {
-            float deltaTime = SystemAPI.Time.DeltaTime;
-            RefRW<RandomComponent> ranRefRW = SystemAPI.GetSingletonRW<RandomComponent>();
+            //float deltaTime = SystemAPI.Time.DeltaTime;
+            //RefRW<RandomComponent> ranRefRW = SystemAPI.GetSingletonRW<RandomComponent>();
 
-            JobHandle jobHandle = new MoveJob { DeltaTime = deltaTime }.ScheduleParallel(state.Dependency);
+            //JobHandle jobHandle = new MoveJob { DeltaTime = deltaTime }.ScheduleParallel(state.Dependency);
 
-            jobHandle.Complete();
-            new TestReachedTargetPositionJob { randomRefRW = ranRefRW }.Run();
+            //jobHandle.Complete();
+            //new TestReachedTargetPositionJob { randomRefRW = ranRefRW }.Run();
         }
     }
 

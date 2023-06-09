@@ -14,12 +14,12 @@ namespace CrowdSimulation_OOP
 
         public FlockSettings Settings;
         public Transform _target;
-        private Vector3 _previousTargetPos;
+        private Vector3 _previousTargetPos; //
 
-        public BoxFormation _boxFormation;
+        public BoxFormation _boxFormation;//
 
-        public event Action OnTargetPositionChanged;
-        public event Action OnTargetReached;
+        public event Action OnTargetPositionChanged;//
+        public event Action OnTargetReached;//
         public void TargetReached(){ OnTargetReached?.Invoke(); }
 
         private void Start()
