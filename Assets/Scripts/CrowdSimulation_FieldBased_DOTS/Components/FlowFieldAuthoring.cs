@@ -1,9 +1,7 @@
 using Global;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.AI;
 using Unity.Transforms;
@@ -21,15 +19,13 @@ namespace Flowfield_DOTS
         public float CellRadius;
 
         public Transform Goal;
-        #endregion
 
         public bool DebugGrid;
 
         private float _cellDiameter;
 
         public float3 GridOrigin { get; private set; }
-
-        public GridDirections Directions { get; private set; }
+        #endregion
 
         private FlowFieldComponent _flowField;
 
@@ -38,16 +34,11 @@ namespace Flowfield_DOTS
             GridOrigin = new float3(transform.position.x - GridSize.x * CellRadius, transform.position.y, transform.position.z - GridSize.y * CellRadius);
             _cellDiameter = CellRadius * 2;
 
-            Directions = new GridDirections(0);
-
             NativeArray<Cell> Grid = CreateGrid();
 
-            //Creates an entity as copy of the goal - modifications have to be done in the unmanaged parts and jobs
-            Entity goal = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntity();
+            //Creates a localtransform component as copy of the goal - modifications have to be done in the unmanaged parts and jobs
             LocalTransform localTransform = new LocalTransform();
             localTransform = localTransform.Translate(Goal.position);
-
-            World.DefaultGameObjectInjectionWorld.EntityManager.AddComponentData(goal, localTransform);
 
             //Creates an entity based on the values set by this class - modifications have to be done in the unmanaged parts and jobs
             _flowField = new FlowFieldComponent(Grid, GridSize, CellRadius, GridOrigin, localTransform); //localTransform is passed as a copy

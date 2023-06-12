@@ -12,8 +12,8 @@ namespace CrowdSimulation_OOP
         public float SpawnRadius = 10;
         public int SpawnCount = 10;
 
-        public FlockSettings Settings;
-        public Transform _target;
+        public FlockSettings Settings;//
+        public Transform _target;//
         private Vector3 _previousTargetPos; //
 
         public BoxFormation _boxFormation;//

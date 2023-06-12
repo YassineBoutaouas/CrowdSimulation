@@ -15,16 +15,10 @@ namespace Flowfield_DOTS
         private RefRW<FlowFieldComponent> _flowField;
 
         [BurstCompile]
-        void OnCreate(ref SystemState state)
-        {
-
-        }
+        void OnCreate(ref SystemState state) { }
 
         [BurstCompile]
-        void OnDestroy(ref SystemState state)
-        {
-
-        }
+        void OnDestroy(ref SystemState state) { }
 
         [BurstCompile]
         void OnUpdate(ref SystemState state)
