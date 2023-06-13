@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Scenes;
 using UnityEngine;
 
 namespace Flowfield_DOTS
@@ -12,10 +15,7 @@ namespace Flowfield_DOTS
 
         public float SpawnRadius;
 
-        public void OnDrawGizmosSelected()
-        {
-            Gizmos.DrawWireSphere(transform.position, SpawnRadius);
-        }
+        public void OnDrawGizmosSelected() { Gizmos.DrawWireSphere(transform.position, SpawnRadius); }
     }
 
     public class FlockSpawnerBaker : Baker<FlockSpawnerAuthoring>
@@ -23,7 +23,7 @@ namespace Flowfield_DOTS
         public override void Bake(FlockSpawnerAuthoring authoring)
         {
             Entity spawner = GetEntity(authoring, TransformUsageFlags.Dynamic);
-            AddComponent(spawner, new FlockSpawnerComponent(GetEntity(authoring.FlockAgentPrefab, TransformUsageFlags.Dynamic), authoring.SpawnCount, authoring.SpawnRadius));
+            AddComponent(spawner, new FlockSpawnerComponent(GetEntity(authoring.FlockAgentPrefab, TransformUsageFlags.Dynamic), authoring.SpawnCount, authoring.SpawnRadius, authoring.transform.position));
         }
     }
 
@@ -33,11 +33,19 @@ namespace Flowfield_DOTS
         public int SpawnCount;
         public float SpawnRadius;
 
-        public FlockSpawnerComponent(Entity flockAgent, int spawnCount, float spawnRadius)
+        public int SpawnedInstances;
+
+        public float3 SpawnPosition;
+
+        public FlockSpawnerComponent(Entity flockAgent, int spawnCount, float spawnRadius, float3 spawnPos)
         {
             FlockAgentPrefab = flockAgent;
             SpawnCount = spawnCount;
             SpawnRadius = spawnRadius;
+
+            SpawnedInstances = 0;
+
+            SpawnPosition = spawnPos;
         }
     }
 }
