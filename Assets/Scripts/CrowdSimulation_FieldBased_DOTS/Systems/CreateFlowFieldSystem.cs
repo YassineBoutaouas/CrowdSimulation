@@ -41,8 +41,6 @@ namespace Flowfield_DOTS
 
                 _flowField.ValueRW._previousPosition = _flowField.ValueRW.Goal.Position;
             }
-
-            
         }
     }
 }
