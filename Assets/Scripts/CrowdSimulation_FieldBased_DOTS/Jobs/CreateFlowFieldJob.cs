@@ -1,65 +1,45 @@
 using Global;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Profiling;
 using UnityEngine;
 
 namespace Flowfield_DOTS
 {
-    [BurstCompile]
-    public struct GetCellFromWorldPositionJob : IJob, IDisposable
+    public partial struct GetCellFromWorldPositionJob : IJobEntity, IDisposable
     {
-        #region Properties
-        public NativeArray<Cell> Grid;
-        public int2 GridSize;
-        public float3 GridOrigin;
+        public FlowFieldComponent _flowField;
 
-        public float CellRadius;
-        public float CellDiameter;
-
-        public float3 Destination;
-        public NativeArray<int> TargetDirection;
-        #endregion
-
-        public GetCellFromWorldPositionJob(NativeArray<Cell> gridCells, int2 gridSize, float3 gridOrigin, float cellRadius, float3 destination)
+        public GetCellFromWorldPositionJob(FlowFieldComponent flowField)
         {
-            Grid = gridCells;
-            GridSize = gridSize;
-            GridOrigin = gridOrigin;
-            CellRadius = cellRadius;
-            CellDiameter = cellRadius * 2;
-            Destination = destination;
-
-            TargetDirection = new NativeArray<int>(2, Allocator.TempJob);
+            _flowField = flowField;
+            __TypeHandle = default;
         }
 
         [BurstCompile]
-        public void Execute()
+        public void Execute(FlockAgentAspect flockAgent)
         {
-            Cell targetCell = GetCellFromWorldPosition(Destination, out int _);
-            TargetDirection[0] = targetCell.GridIndex.x;
-            TargetDirection[1] = targetCell.GridIndex.y;
+            Cell ownedCell = GetCellFromWorldPosition(flockAgent.Transform.ValueRW.Position, out int2 _);
+
+            flockAgent.Transform.ValueRW = flockAgent.Transform.ValueRW.Translate(new float3(ownedCell.BestDirection.x * 0.01f, 0f, ownedCell.BestDirection.y * 0.01f));
         }
 
-        public Cell GetCellFromWorldPosition(float3 worldPos, out int totalIndex)
+        public Cell GetCellFromWorldPosition(float3 worldPos, out int2 index)
         {
-            float percentX = (worldPos.x) / (GridSize.x * CellDiameter);
-            float percentY = (worldPos.z) / (GridSize.y * CellDiameter);
+            float percentX = (worldPos.x) / (_flowField.GridSize.x * _flowField.CellDiameter);
+            float percentY = (worldPos.z) / (_flowField.GridSize.y * _flowField.CellDiameter);
 
             percentX = math.clamp(percentX.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
             percentY = math.clamp(percentY.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
 
-            int x = math.clamp((int)math.floor(GridSize.x * percentX), 0, GridSize.x - 1);
-            int y = math.clamp((int)math.floor(GridSize.y * percentY), 0, GridSize.y - 1);
+            int x = math.clamp((int)math.floor(_flowField.GridSize.x * percentX), 0, _flowField.GridSize.x - 1);
+            int y = math.clamp((int)math.floor(_flowField.GridSize.y * percentY), 0, _flowField.GridSize.y - 1);
+            index = new int2(x, y);
 
-            totalIndex = x.CalculateFlatIndex(y, GridSize.x);
-
-            return Grid[totalIndex];
+            return _flowField.Grid[x.CalculateFlatIndex(y, _flowField.GridSize.x)];
         }
 
         public void Dispose()
@@ -72,30 +52,15 @@ namespace Flowfield_DOTS
     public struct CreateFlowFieldJob : IJob, IDisposable
     {
         #region Properties
-        public NativeArray<Cell> Grid;
-        public int2 GridSize;
-        public float3 GridOrigin;
-
-        public float CellRadius;
-        public float CellDiameter;
-
-        public float3 Destination;
-
-        public GridDirections Directions;
+        public FlowFieldComponent _flowField;
 
         public int2 InvalidDirection;
         #endregion
 
-        public CreateFlowFieldJob(NativeArray<Cell> gridCells, int2 gridSize, float3 gridOrigin, float cellRadius, float3 destination, GridDirections directions)
+        public CreateFlowFieldJob(FlowFieldComponent flowField)
         {
-            Grid = gridCells;
-            GridSize = gridSize;
-            GridOrigin = gridOrigin;
-            CellRadius = cellRadius;
-            CellDiameter = cellRadius * 2;
-            Destination = destination;
+            _flowField = flowField;
 
-            Directions = directions;
             InvalidDirection = new int2(-1, -1);
         }
 
@@ -109,12 +74,12 @@ namespace Flowfield_DOTS
         public void CreateIntegrationField()
         {
 
-            Cell destinationCell = GetCellFromWorldPosition(Destination, out int2 destinationCellIndex);
+            Cell destinationCell = GetCellFromWorldPosition(_flowField.Goal.Position, out int2 destinationCellIndex);
 
             destinationCell.Cost = 0;
             destinationCell.BestCost = 0;
 
-            Grid[destinationCellIndex.x.CalculateFlatIndex(destinationCellIndex.y, GridSize.x)] = destinationCell;
+            _flowField.Grid[destinationCellIndex.x.CalculateFlatIndex(destinationCellIndex.y, _flowField.GridSize.x)] = destinationCell;
 
             NativeQueue<int2> cellsToCheck = new NativeQueue<int2>(Allocator.TempJob);
 
@@ -123,21 +88,21 @@ namespace Flowfield_DOTS
             while (cellsToCheck.Count > 0)
             {
                 int2 currentCellIndex = cellsToCheck.Dequeue();
-                int currentCelltotalIndex = currentCellIndex.x.CalculateFlatIndex(currentCellIndex.y, GridSize.x);
+                int currentCelltotalIndex = currentCellIndex.x.CalculateFlatIndex(currentCellIndex.y, _flowField.GridSize.x);
 
-                NativeList<Cell> currentNeighbors = GetNeighborCells(currentCellIndex, Directions.CardinalDirections);
+                NativeList<Cell> currentNeighbors = GetNeighborCells(currentCellIndex, _flowField.Directions.CardinalDirections);
 
                 for (int i = 0; i < currentNeighbors.Length; i++)
                 {
                     Cell currNeighbor = currentNeighbors[i];
 
                     if (currNeighbor.Cost == byte.MaxValue) continue;
-                    if (currNeighbor.Cost + Grid[currentCelltotalIndex].BestCost < currNeighbor.BestCost)
+                    if (currNeighbor.Cost + _flowField.Grid[currentCelltotalIndex].BestCost < currNeighbor.BestCost)
                     {
-                        currNeighbor.BestCost = (ushort)(currNeighbor.Cost + Grid[currentCelltotalIndex].BestCost);
+                        currNeighbor.BestCost = (ushort)(currNeighbor.Cost + _flowField.Grid[currentCelltotalIndex].BestCost);
 
                         currentNeighbors[i] = currNeighbor;
-                        Grid[currNeighbor.GridIndex.x.CalculateFlatIndex(currNeighbor.GridIndex.y, GridSize.x)] = currNeighbor;
+                        _flowField.Grid[currNeighbor.GridIndex.x.CalculateFlatIndex(currNeighbor.GridIndex.y, _flowField.GridSize.x)] = currNeighbor;
 
                         cellsToCheck.Enqueue(currentNeighbors[i].GridIndex);
                     }
@@ -151,11 +116,11 @@ namespace Flowfield_DOTS
 
         public void CreateFlowField()
         {
-            for (int i = 0; i < Grid.Length; i++)
+            for (int i = 0; i < _flowField.Grid.Length; i++)
             {
-                Cell cell = Grid[i];
+                Cell cell = _flowField.Grid[i];
 
-                NativeList<Cell> neighbors = GetNeighborCells(cell.GridIndex, Directions.AllDirections);
+                NativeList<Cell> neighbors = GetNeighborCells(cell.GridIndex, _flowField.Directions.AllDirections);
 
                 int bestCost = cell.BestCost;
                 int2 lowestCostIndex = cell.GridIndex;
@@ -172,7 +137,7 @@ namespace Flowfield_DOTS
 
                 cell.BestDirection = GetDirection(lowestCostIndex - cell.GridIndex); //only has to be calculated once really
 
-                Grid[i] = cell;
+                _flowField.Grid[i] = cell;
 
                 neighbors.Dispose();
             }
@@ -180,13 +145,13 @@ namespace Flowfield_DOTS
 
         public int2 GetDirection(int2 vector)
         {
-            for (int i = 0; i < Directions.CardinalAndInterCardinalDirections.Length; i++)
+            for (int i = 0; i < _flowField.Directions.CardinalAndInterCardinalDirections.Length; i++)
             {
-                if (vector.Equals(Directions.CardinalAndInterCardinalDirections[i]))
-                    return Directions.CardinalAndInterCardinalDirections[i];
+                if (vector.Equals(_flowField.Directions.CardinalAndInterCardinalDirections[i]))
+                    return _flowField.Directions.CardinalAndInterCardinalDirections[i];
             }
 
-            return Directions.AllDirections[0];
+            return _flowField.Directions.AllDirections[0];
         }
 
         public NativeList<Cell> GetNeighborCells(int2 gridIndex, NativeArray<int2> gridDirections)
@@ -198,7 +163,7 @@ namespace Flowfield_DOTS
                 int2 neighborIndex = GetCellAtRelativePos(gridIndex, currentDir);
 
                 if (!neighborIndex.Equals(InvalidDirection))
-                    neighbors.Add(Grid[neighborIndex.x.CalculateFlatIndex(neighborIndex.y, GridSize.x)]);
+                    neighbors.Add(_flowField.Grid[neighborIndex.x.CalculateFlatIndex(neighborIndex.y, _flowField.GridSize.x)]);
             }
 
             return neighbors;
@@ -208,7 +173,7 @@ namespace Flowfield_DOTS
         {
             int2 finalPos = gridPos + offset;
 
-            if (finalPos.x < 0 || finalPos.x >= GridSize.x || finalPos.y < 0 || finalPos.y >= GridSize.y)
+            if (finalPos.x < 0 || finalPos.x >= _flowField.GridSize.x || finalPos.y < 0 || finalPos.y >= _flowField.GridSize.y)
                 return InvalidDirection;
 
             return finalPos;
@@ -216,18 +181,18 @@ namespace Flowfield_DOTS
 
         public Cell GetCellFromWorldPosition(float3 worldPos, out int2 index)
         {
-            float percentX = (worldPos.x) / (GridSize.x * CellDiameter);
-            float percentY = (worldPos.z) / (GridSize.y * CellDiameter);
+            float percentX = (worldPos.x) / (_flowField.GridSize.x * _flowField.CellDiameter);
+            float percentY = (worldPos.z) / (_flowField.GridSize.y * _flowField.CellDiameter);
 
             percentX = math.clamp(percentX.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
             percentY = math.clamp(percentY.Remap(-0.5f, 0.5f, 0f, 1f), 0, 1);
 
-            int x = math.clamp((int)math.floor(GridSize.x * percentX), 0, GridSize.x - 1);
-            int y = math.clamp((int)math.floor(GridSize.y * percentY), 0, GridSize.y - 1);
+            int x = math.clamp((int)math.floor(_flowField.GridSize.x * percentX), 0, _flowField.GridSize.x - 1);
+            int y = math.clamp((int)math.floor(_flowField.GridSize.y * percentY), 0, _flowField.GridSize.y - 1);
 
             index = new int2(x, y);
 
-            return Grid[x.CalculateFlatIndex(y, GridSize.x)];
+            return _flowField.Grid[x.CalculateFlatIndex(y, _flowField.GridSize.x)];
         }
 
         public void Dispose()

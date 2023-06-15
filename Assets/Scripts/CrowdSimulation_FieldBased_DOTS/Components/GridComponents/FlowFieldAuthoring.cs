@@ -97,8 +97,8 @@ namespace Flowfield_DOTS
                     if (_flowField.Grid.IsCreated && _flowField.Grid.Length > 0)
                     {
                         //Handles.Label(_flowField.Grid[totalIndex].WorldPosition, _flowField.Grid[totalIndex].Cost.ToString(), style);
-                        Handles.Label(_flowField.Grid[totalIndex].WorldPosition, _flowField.Grid[totalIndex].BestCost.ToString(), style);
-                        //FlowFieldExtensions.GizmosDrawArrow(Grid[totalIndex].WorldPosition, new Vector3(Grid[totalIndex].BestDirection.x, 0, Grid[totalIndex].BestDirection.y));
+                        //Handles.Label(_flowField.Grid[totalIndex].WorldPosition, _flowField.Grid[totalIndex].BestCost.ToString(), style);
+                        ExtensionMethods.GizmosDrawArrow(_flowField.Grid[totalIndex].WorldPosition, new Vector3(_flowField.Grid[totalIndex].BestDirection.x, 0, _flowField.Grid[totalIndex].BestDirection.y));
 
                         Gizmos.color = _flowField.Grid[totalIndex].Cost == 255 ? Color.red : Color.white;
                     }
@@ -128,6 +128,8 @@ namespace Flowfield_DOTS
 
         public GridDirections Directions { get; private set; }
 
+        public bool IsCreated;
+
         public FlowFieldComponent(NativeArray<Cell> grid, int2 gridSize, float cellRadius, float3 gridOrigin, LocalTransform goal)
         {
             GridSize = gridSize;
@@ -141,6 +143,8 @@ namespace Flowfield_DOTS
             _previousPosition = float3.zero;
 
             Directions = new GridDirections(0);
+
+            IsCreated = false;
         }
     }
 }
