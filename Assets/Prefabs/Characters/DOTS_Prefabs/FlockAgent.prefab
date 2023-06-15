@@ -774,6 +774,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3702125550366989892}
   - component: {fileID: 1513941871548596481}
+  - component: {fileID: 8091703308886587844}
+  - component: {fileID: 8622687150845922109}
   - component: {fileID: 2432734058755431230}
   m_Layer: 4
   m_Name: FlockAgent
@@ -811,6 +813,61 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9225b2b92b688904887fcd7fea50871f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8091703308886587844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2762655658707783423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5aa371951f72a5a488ea9037da647565, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Position:
+    x: 0
+    y: 0
+    z: 0
+  Forward:
+    x: 0
+    y: 0
+    z: 0
+  AvgFlockHeading:
+    x: 0
+    y: 0
+    z: 0
+  AvgAvoidanceHeading:
+    x: 0
+    y: 0
+    z: 0
+  CenterOfFlockmates:
+    x: 0
+    y: 0
+    z: 0
+  Velocity:
+    x: 0
+    y: 0
+    z: 0
+--- !u!114 &8622687150845922109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2762655658707783423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 340f66c540e2b9444869ef57837745ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MinSpeed: 2
+  MaxSpeed: 5
+  MaxSteerForce: 3
+  AlignWeight: 1
+  CohesionWeight: 1
+  SeparationWeight: 1
+  TargetWeight: 1
 --- !u!136 &2432734058755431230
 CapsuleCollider:
   m_ObjectHideFlags: 0

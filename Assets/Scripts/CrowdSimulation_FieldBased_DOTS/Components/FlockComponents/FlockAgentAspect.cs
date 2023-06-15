@@ -8,6 +8,10 @@ namespace Flowfield_DOTS
         private readonly Entity _entity;
 
         public readonly RefRW<LocalTransform> Transform;
+
+        public readonly RefRO<FlockAgentSettingsComponent> Settings;
+        public readonly RefRW<FlockAgentComponent> FlockAgent;
+
         public readonly RefRO<FlockAgentTagComponent> TagComponent;
     }
 }
