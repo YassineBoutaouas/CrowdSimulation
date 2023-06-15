@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.AI;
 using Unity.Transforms;
+using Unity.AI.Navigation;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -61,8 +62,14 @@ namespace Flowfield_DOTS
                     float3 worldPos = new float3((_cellDiameter * x + CellRadius) + GridOrigin.x, GridOrigin.y, (_cellDiameter * y + CellRadius) + GridOrigin.z);
 
                     byte cost = 1;
-                    if (!NavMesh.SamplePosition(worldPos, out NavMeshHit _, CellRadius * 1.5f, NavMesh.AllAreas))
-                        cost = 255;
+                    foreach(Collider collider in Physics.OverlapBox(worldPos, CellRadius * Vector3.one)) //(!NavMesh.SamplePosition(worldPos, out NavMeshHit _, CellRadius * 1.5f, NavMesh.AllAreas))
+                    {
+                        if (!collider.TryGetComponent(out NavMeshSurface _))
+                        {
+                            cost = 255;
+                            break;
+                        }
+                    }
 
                     Cell cell = new Cell(worldPos, new int2(x, y));
                     cell.SetCost(cost);

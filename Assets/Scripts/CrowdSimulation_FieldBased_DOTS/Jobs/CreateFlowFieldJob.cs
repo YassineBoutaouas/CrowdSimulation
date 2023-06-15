@@ -9,25 +9,32 @@ using UnityEngine;
 
 namespace Flowfield_DOTS
 {
+    [BurstCompile]
     public partial struct GetCellFromWorldPositionJob : IJobEntity, IDisposable
     {
         public FlowFieldComponent _flowField;
+
+        public NativeArray<float> Direction;
 
         public GetCellFromWorldPositionJob(FlowFieldComponent flowField)
         {
             _flowField = flowField;
             __TypeHandle = default;
+            Direction = new NativeArray<float>(2, Allocator.TempJob);
         }
 
         [BurstCompile]
         public void Execute(FlockAgentAspect flockAgent)
         {
-            Cell ownedCell = GetCellFromWorldPosition(flockAgent.Transform.ValueRW.Position, out int2 _);
+            float2 bestDirection = GetCellFromWorldPosition(flockAgent.Transform.ValueRW.Position);
 
-            flockAgent.Transform.ValueRW = flockAgent.Transform.ValueRW.Translate(new float3(ownedCell.BestDirection.x * 0.01f, 0f, ownedCell.BestDirection.y * 0.01f));
+            Direction[0] = bestDirection.x;
+            Direction[1] = bestDirection.y;
+
+            //flockAgent.Transform.ValueRW = flockAgent.Transform.ValueRW.Translate(new float3(ownedCell.BestDirection.x * 0.01f, 0f, ownedCell.BestDirection.y * 0.01f));
         }
 
-        public Cell GetCellFromWorldPosition(float3 worldPos, out int2 index)
+        public float2 GetCellFromWorldPosition(float3 worldPos)
         {
             float percentX = (worldPos.x) / (_flowField.GridSize.x * _flowField.CellDiameter);
             float percentY = (worldPos.z) / (_flowField.GridSize.y * _flowField.CellDiameter);
@@ -37,9 +44,8 @@ namespace Flowfield_DOTS
 
             int x = math.clamp((int)math.floor(_flowField.GridSize.x * percentX), 0, _flowField.GridSize.x - 1);
             int y = math.clamp((int)math.floor(_flowField.GridSize.y * percentY), 0, _flowField.GridSize.y - 1);
-            index = new int2(x, y);
 
-            return _flowField.Grid[x.CalculateFlatIndex(y, _flowField.GridSize.x)];
+            return _flowField.Grid[x.CalculateFlatIndex(y, _flowField.GridSize.x)].BestDirection;
         }
 
         public void Dispose()
