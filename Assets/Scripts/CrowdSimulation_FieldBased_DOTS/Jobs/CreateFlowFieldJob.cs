@@ -31,7 +31,7 @@ namespace Flowfield_DOTS
             Direction[0] = bestDirection.x;
             Direction[1] = bestDirection.y;
 
-            //flockAgent.Transform.ValueRW = flockAgent.Transform.ValueRW.Translate(new float3(ownedCell.BestDirection.x * 0.01f, 0f, ownedCell.BestDirection.y * 0.01f));
+            //flockAgent.Transform.ValueRW = flockAgent.Transform.ValueRW.Translate(new float3(bestDirection.x * 0.03f, 0f, bestDirection.y * 0.03f));
         }
 
         public float2 GetCellFromWorldPosition(float3 worldPos)

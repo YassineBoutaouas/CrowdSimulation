@@ -12,6 +12,10 @@ namespace Flowfield_DOTS
         public float MaxSpeed = 5;
         public float MaxSteerForce = 3;
 
+        [Header("Avoidance"), Space()]
+        public float AvoidanceRadius;
+        public float PerceptionRadius;
+
         [Header("Weights"), Space()]
         public float AlignWeight = 1;
         public float CohesionWeight = 1;
@@ -24,7 +28,7 @@ namespace Flowfield_DOTS
         public override void Bake(FlockAgentSettingsAuthoring authoring)
         {
             Entity e = GetEntity(authoring, TransformUsageFlags.Dynamic);
-            AddComponent(e, new FlockAgentSettingsComponent(authoring.MinSpeed, authoring.MaxSpeed, authoring.MaxSteerForce, authoring.AlignWeight, authoring.CohesionWeight, authoring.SeparationWeight, authoring.TargetWeight));
+            AddComponent(e, new FlockAgentSettingsComponent(authoring.MinSpeed, authoring.MaxSpeed, authoring.MaxSteerForce, authoring.AvoidanceRadius, authoring.PerceptionRadius, authoring.AlignWeight, authoring.CohesionWeight, authoring.SeparationWeight, authoring.TargetWeight));
         }
     }
 
@@ -34,16 +38,23 @@ namespace Flowfield_DOTS
         public float MaxSpeed;
         public float MaxSteerForce;
 
+        public float AvoidanceRadius;
+        public float PerceptionRadius;
+
         public float AlignWeight;
         public float CohesionWeight;
         public float SeparationWeight;
         public float TargetWeight;
 
-        public FlockAgentSettingsComponent(float minSpeed, float maxSpeed, float maxSteerForce, float alignWeight, float cohesionweight, float separationWeight, float targetWeight)
+        public FlockAgentSettingsComponent(float minSpeed, float maxSpeed, float maxSteerForce, float avoidanceRadius, float perceptionRadius, float alignWeight, float cohesionweight, float separationWeight, float targetWeight)
         {
             MinSpeed = minSpeed;
             MaxSpeed = maxSpeed;
             MaxSteerForce = maxSteerForce;
+
+            AvoidanceRadius = avoidanceRadius * avoidanceRadius;
+            PerceptionRadius = perceptionRadius * perceptionRadius;
+
             AlignWeight = alignWeight;
             CohesionWeight = cohesionweight;
             SeparationWeight = separationWeight;

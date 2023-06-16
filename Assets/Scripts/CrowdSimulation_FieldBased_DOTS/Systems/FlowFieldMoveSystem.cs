@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using UnityEngine;
@@ -30,6 +31,7 @@ namespace Flowfield_DOTS
 
             JobHandle createFlowFieldJobHandle;
 
+            //Execute the job for calculating a flowfield - only do it if the goal position has changed over the last frame
             if (!_flowField.ValueRW._previousPosition.Equals(_flowField.ValueRW.Goal.Position))
             {
                 _flowField.ValueRW.IsCreated = false;
@@ -48,18 +50,22 @@ namespace Flowfield_DOTS
                 _flowField.ValueRW.IsCreated = true;
             }
 
-            //Dependencies:
-
             state.CompleteDependency();
 
-            ///ExportPhysicsWorld:CheckDynamicBodyIntegrity
-            ///Jobs:CreateRigidBodies
-            ///Jobs:RecordDynamicBodyIntegrity
-
-            //JobHandle jobHandle = new GetCellFromWorldPositionJob(_flowField.ValueRW.Grid, _flowField.ValueRW.GridSize, _flowField.ValueRW.GridOrigin, _flowField.ValueRW.CellRadius, _flowField.ValueRW.Goal.Position).ScheduleParallel(state.Dependency);
-            JobHandle moveJobHandle = new GetCellFromWorldPositionJob(_flowField.ValueRW).Schedule(state.Dependency);
+            //ScheduleParallel causes race conditions
+            GetCellFromWorldPositionJob getTargetDirection = new GetCellFromWorldPositionJob(_flowField.ValueRW);
+            JobHandle moveJobHandle = getTargetDirection.Schedule(state.Dependency);
 
             moveJobHandle.Complete();
+
+            float3 direction = new float3(getTargetDirection.Direction[0], 0f, getTargetDirection.Direction[1]);
+
+            
+            //EntityQuery entityQuery;
+
+            JobHandle flockingJobHandle = new FindNeighborsJob(direction, SystemAPI.Time.DeltaTime,  .Schedule(state.Dependency);
+
+            flockingJobHandle.Complete();
         }
     }
 }
