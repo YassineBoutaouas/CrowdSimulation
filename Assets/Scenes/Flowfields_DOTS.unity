@@ -169,5 +169,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FlockAgentPrefab: {fileID: 2762655658707783423, guid: 4d1f8d84f00d98c4e9867ee04faf3639,
     type: 3}
-  SpawnCount: 10000
+  SpawnCount: 100
   SpawnRadius: 30

@@ -84,6 +84,7 @@ MonoBehaviour:
     x: 0
     y: 0
     z: 0
+  Speed: 0
 --- !u!114 &8622687150845922109
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,9 +97,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 340f66c540e2b9444869ef57837745ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MinSpeed: 2
-  MaxSpeed: 5
-  MaxSteerForce: 3
+  Speed: 7.04372
+  MinSpeed: 4
+  MaxSpeed: 8
+  MaxSteerForce: 5
+  AvoidanceRadius: 3
+  PerceptionRadius: 5
   AlignWeight: 1
   CohesionWeight: 1
   SeparationWeight: 1

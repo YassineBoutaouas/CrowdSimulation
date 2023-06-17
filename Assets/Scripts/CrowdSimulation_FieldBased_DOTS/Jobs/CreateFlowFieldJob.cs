@@ -10,17 +10,14 @@ using UnityEngine;
 namespace Flowfield_DOTS
 {
     [BurstCompile]
-    public partial struct GetCellFromWorldPositionJob : IJobEntity, IDisposable
+    public partial struct GetDirectionToTargetJob : IJobEntity, IDisposable
     {
         public FlowFieldComponent _flowField;
 
-        public NativeArray<float> Direction;
-
-        public GetCellFromWorldPositionJob(FlowFieldComponent flowField)
+        public GetDirectionToTargetJob(FlowFieldComponent flowField)
         {
             _flowField = flowField;
             __TypeHandle = default;
-            Direction = new NativeArray<float>(2, Allocator.TempJob);
         }
 
         [BurstCompile]
@@ -28,8 +25,7 @@ namespace Flowfield_DOTS
         {
             float2 bestDirection = GetCellFromWorldPosition(flockAgent.Transform.ValueRW.Position);
 
-            Direction[0] = bestDirection.x;
-            Direction[1] = bestDirection.y;
+            flockAgent.FlockAgent.ValueRW.CurrentDirection = bestDirection;
 
             //flockAgent.Transform.ValueRW = flockAgent.Transform.ValueRW.Translate(new float3(bestDirection.x * 0.03f, 0f, bestDirection.y * 0.03f));
         }
@@ -55,7 +51,7 @@ namespace Flowfield_DOTS
     }
 
     [BurstCompile]
-    public struct CreateFlowFieldJob : IJob, IDisposable
+    public struct CreateFlowFieldJob : IJob
     {
         #region Properties
         public FlowFieldComponent _flowField;
@@ -199,11 +195,6 @@ namespace Flowfield_DOTS
             index = new int2(x, y);
 
             return _flowField.Grid[x.CalculateFlatIndex(y, _flowField.GridSize.x)];
-        }
-
-        public void Dispose()
-        {
-            return;
         }
     }
 }

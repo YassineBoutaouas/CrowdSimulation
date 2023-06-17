@@ -135,8 +135,6 @@ namespace Flowfield_DOTS
 
         public GridDirections Directions { get; private set; }
 
-        public bool IsCreated;
-
         public FlowFieldComponent(NativeArray<Cell> grid, int2 gridSize, float cellRadius, float3 gridOrigin, LocalTransform goal)
         {
             GridSize = gridSize;
@@ -150,8 +148,6 @@ namespace Flowfield_DOTS
             _previousPosition = float3.zero;
 
             Directions = new GridDirections(0);
-
-            IsCreated = false;
         }
     }
 }

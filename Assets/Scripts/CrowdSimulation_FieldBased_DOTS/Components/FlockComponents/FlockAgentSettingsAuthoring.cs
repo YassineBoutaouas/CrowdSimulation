@@ -8,6 +8,7 @@ namespace Flowfield_DOTS
     public class FlockAgentSettingsAuthoring : MonoBehaviour
     {
         [Header("Acceleration"), Space()]
+        public float Speed = 1;
         public float MinSpeed = 2;
         public float MaxSpeed = 5;
         public float MaxSteerForce = 3;
@@ -28,12 +29,14 @@ namespace Flowfield_DOTS
         public override void Bake(FlockAgentSettingsAuthoring authoring)
         {
             Entity e = GetEntity(authoring, TransformUsageFlags.Dynamic);
-            AddComponent(e, new FlockAgentSettingsComponent(authoring.MinSpeed, authoring.MaxSpeed, authoring.MaxSteerForce, authoring.AvoidanceRadius, authoring.PerceptionRadius, authoring.AlignWeight, authoring.CohesionWeight, authoring.SeparationWeight, authoring.TargetWeight));
+            authoring.Speed = UnityEngine.Random.Range(authoring.MinSpeed, authoring.MaxSpeed);
+            AddComponent(e, new FlockAgentSettingsComponent(authoring.MinSpeed, authoring.MaxSpeed, authoring.MaxSteerForce, authoring.AvoidanceRadius, authoring.PerceptionRadius, authoring.AlignWeight, authoring.CohesionWeight, authoring.SeparationWeight, authoring.TargetWeight, authoring.Speed));
         }
     }
 
     public struct FlockAgentSettingsComponent : IComponentData
     {
+        public float Speed;
         public float MinSpeed;
         public float MaxSpeed;
         public float MaxSteerForce;
@@ -46,7 +49,7 @@ namespace Flowfield_DOTS
         public float SeparationWeight;
         public float TargetWeight;
 
-        public FlockAgentSettingsComponent(float minSpeed, float maxSpeed, float maxSteerForce, float avoidanceRadius, float perceptionRadius, float alignWeight, float cohesionweight, float separationWeight, float targetWeight)
+        public FlockAgentSettingsComponent(float minSpeed, float maxSpeed, float maxSteerForce, float avoidanceRadius, float perceptionRadius, float alignWeight, float cohesionweight, float separationWeight, float targetWeight, float speed)
         {
             MinSpeed = minSpeed;
             MaxSpeed = maxSpeed;
@@ -59,6 +62,8 @@ namespace Flowfield_DOTS
             CohesionWeight = cohesionweight;
             SeparationWeight = separationWeight;
             TargetWeight = targetWeight;
+
+            Speed = speed;
         }
     }
 }

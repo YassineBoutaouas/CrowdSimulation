@@ -16,6 +16,9 @@ namespace Flowfield_DOTS
         public float3 CenterOfFlockmates;
 
         public float3 Velocity;
+
+
+        public float Speed;
     }
 
     public class FlockAgentBaker : Baker<FlockAgentAuthoring>
@@ -23,12 +26,15 @@ namespace Flowfield_DOTS
         public override void Bake(FlockAgentAuthoring authoring)
         {
             Entity e = GetEntity(authoring, TransformUsageFlags.Dynamic);
+
+
             AddComponent(e, new FlockAgentComponent(authoring.Position, authoring.Forward, authoring.AvgFlockHeading, authoring.AvgAvoidanceHeading, authoring.CenterOfFlockmates, authoring.Velocity));
         }
     }
 
     public struct FlockAgentComponent : IComponentData
     {
+        public float2 CurrentDirection;
         public float3 Position;
         public float3 Forward;
 
@@ -40,6 +46,7 @@ namespace Flowfield_DOTS
 
         public FlockAgentComponent(float3 position, float3 forward, float3 avgflockheading, float3 avgavoidanceheading, float3 centerofflockmates, float3 velocity)
         {
+            CurrentDirection = float2.zero;
             Position = position;
             Forward = forward;
             AvgFlockHeading = avgflockheading;
