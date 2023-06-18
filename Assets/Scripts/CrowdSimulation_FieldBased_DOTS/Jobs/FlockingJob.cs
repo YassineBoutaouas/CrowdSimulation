@@ -4,6 +4,7 @@ using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace Flowfield_DOTS
@@ -74,7 +75,8 @@ namespace Flowfield_DOTS
 
                 float2 direction = aspects[entityIndexA].FlockAgent.ValueRO.CurrentDirection;
 
-                float3 acceleration = SteerTowards(new float3(direction.x, 0, direction.y), maxSteerForce) * aspects[entityIndexA].Settings.ValueRO.TargetWeight; 
+                //float3 acceleration = SteerTowards(new float3(direction.x, 0, direction.y) * aspects[entityIndexA].Settings.ValueRO.Speed, maxSteerForce) * aspects[entityIndexA].Settings.ValueRO.Speed * aspects[entityIndexA].Settings.ValueRO.TargetWeight;
+                float3 acceleration = new float3(direction.x, 0, direction.y) * aspects[entityIndexA].Settings.ValueRO.Speed * aspects[entityIndexA].Settings.ValueRO.TargetWeight;
 
                 if (numFlockMates > 0)
                 {
@@ -88,14 +90,14 @@ namespace Flowfield_DOTS
                         SteerTowards(separationHeading, maxSteerForce) * aspects[entityIndexA].Settings.ValueRO.SeparationWeight;
                 }
 
-                float3 velocity = acceleration * DeltaTime;
-                float magnitude = math.length(velocity);
+                acceleration *= DeltaTime;
+                float magnitude = math.length(acceleration);
 
                 if (magnitude > 0)
                 {
-                    float3 dir = math.normalize(velocity);
+                    float3 dir = math.normalize(acceleration);
                     float speed = math.clamp(magnitude, aspects[entityIndexA].Settings.ValueRO.MinSpeed, aspects[entityIndexA].Settings.ValueRO.MaxSpeed);
-                    velocity = dir * speed;
+                    acceleration = dir * speed;
 
                     //Debug.Log($"velocity: {velocity}; acceleration:{acceleration}; heading: {flockHeading}; offsetCenter: {centerOfFlockMates}; separation: {separationHeading}");
                     //Debug.Log($"velocity: {velocity}; acceleration:{acceleration};");
@@ -103,11 +105,7 @@ namespace Flowfield_DOTS
                     aspects[entityIndexA].FlockAgent.ValueRW.Position = aspects[entityIndexA].Transform.ValueRO.Position;
                     aspects[entityIndexA].FlockAgent.ValueRW.Forward = dir;
 
-                    //Set rotation
-                    //-HERE-
-
-                    //Set position
-                    aspects[entityIndexA].Transform.ValueRW = aspects[entityIndexA].Transform.ValueRW.Translate(velocity * DeltaTime);
+                    aspects[entityIndexA].Transform.ValueRW = new LocalTransform { Position = aspects[entityIndexA].Transform.ValueRO.Position + acceleration * DeltaTime, Rotation = Quaternion.LookRotation(dir), Scale = 1 };
                 }
             }
         }

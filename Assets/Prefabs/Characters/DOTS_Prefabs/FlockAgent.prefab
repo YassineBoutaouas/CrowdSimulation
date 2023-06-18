@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1513941871548596481}
   - component: {fileID: 8091703308886587844}
   - component: {fileID: 8622687150845922109}
+  - component: {fileID: -3901841188502062565}
   m_Layer: 4
   m_Name: FlockAgent
   m_TagString: Untagged
@@ -96,16 +97,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 340f66c540e2b9444869ef57837745ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 5.281605
+  Speed: 4.701602
   MinSpeed: 4
   MaxSpeed: 8
   MaxSteerForce: 8
-  AvoidanceRadius: 5
-  PerceptionRadius: 10
+  AvoidanceRadius: 8
+  PerceptionRadius: 15
   AlignWeight: 1
   CohesionWeight: 1
   SeparationWeight: 1
   TargetWeight: 1
+--- !u!136 &-3901841188502062565
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2762655658707783423}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &3402946400394980860
 GameObject:
   m_ObjectHideFlags: 0

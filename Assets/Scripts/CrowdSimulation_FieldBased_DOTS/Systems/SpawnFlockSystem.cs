@@ -4,6 +4,7 @@ using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -39,6 +40,8 @@ namespace Flowfield_DOTS
                         spawner.ValueRW.SpawnPosition.y,
                         spawner.ValueRW.SpawnPosition.z + _random.NextFloat(0f, spawner.ValueRW.SpawnRadius)
                     ), Scale = 1f });
+
+                    //_buffer.AddComponent(entity, new PhysicsVelocity());
 
                     spawner.ValueRW.SpawnedInstances++;
                 }

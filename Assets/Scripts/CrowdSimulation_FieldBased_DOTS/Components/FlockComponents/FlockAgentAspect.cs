@@ -1,4 +1,5 @@
 using Unity.Entities;
+using Unity.Physics;
 using Unity.Transforms;
 
 namespace Flowfield_DOTS
@@ -13,5 +14,7 @@ namespace Flowfield_DOTS
         public readonly RefRW<FlockAgentComponent> FlockAgent;
 
         public readonly RefRO<FlockAgentTagComponent> TagComponent;
+
+        //public readonly RefRO<PhysicsVelocity> Rigidbody;
     }
 }
