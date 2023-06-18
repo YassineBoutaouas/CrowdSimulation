@@ -4,6 +4,7 @@ using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Flowfield_DOTS
 {
@@ -27,6 +28,10 @@ namespace Flowfield_DOTS
         private float3 SteerTowards(float3 velocity, float maxSteerForce)
         {
             float len = math.clamp(math.length(velocity), 0, maxSteerForce);
+
+            if (len == 0)
+                return float3.zero;
+
             return math.normalize(velocity) * len;
 
             //float3 direction = math.normalize(velocity);
@@ -37,16 +42,15 @@ namespace Flowfield_DOTS
         [BurstCompile]
         public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
         {
-            int numFlockMates = 0;
-
-            float3 flockHeading = float3.zero;
-            float3 separationHeading = float3.zero;
-
             FlockAgentAspect.ResolvedChunk aspects = AspectTypeHandle.Resolve(chunk);
 
             for (int entityIndexA = 0; entityIndexA < aspects.Length; entityIndexA++)
             {
+                int numFlockMates = 0;
+
                 float3 centerOfFlockMates = float3.zero; //aspects[entityIndexB].FlockAgent.ValueRO.CenterOfFlockmates;
+                float3 flockHeading = float3.zero;
+                float3 separationHeading = float3.zero;
 
                 for (int entityIndexB = 0; entityIndexB < aspects.Length; entityIndexB++)
                 {
@@ -62,12 +66,15 @@ namespace Flowfield_DOTS
                         centerOfFlockMates += aspects[entityIndexB].FlockAgent.ValueRO.Position;
 
                         if (sqrDistance < aspects[entityIndexA].Settings.ValueRO.AvoidanceRadius)
-                            separationHeading -= ((offset / sqrDistance));
+                            separationHeading -= offset / sqrDistance;
                     }
                 }
 
+                float maxSteerForce = aspects[entityIndexA].Settings.ValueRO.MaxSteerForce;
+
                 float2 direction = aspects[entityIndexA].FlockAgent.ValueRO.CurrentDirection;
-                float3 acceleration = new float3(direction.x, 0, direction.y) * aspects[entityIndexA].Settings.ValueRO.TargetWeight;
+
+                float3 acceleration = SteerTowards(new float3(direction.x, 0, direction.y), maxSteerForce) * aspects[entityIndexA].Settings.ValueRO.TargetWeight; 
 
                 if (numFlockMates > 0)
                 {
@@ -75,26 +82,33 @@ namespace Flowfield_DOTS
 
                     float3 offsetToCenter = centerOfFlockMates - aspects[entityIndexA].Transform.ValueRO.Position;
 
-                    float maxSteerForce = aspects[entityIndexA].Settings.ValueRO.MaxSteerForce;
-                    //acceleration +=
-                    //    SteerTowards(flockHeading, maxSteerForce) * aspects[entityIndexA].Settings.ValueRO.AlignWeight +
-                    //    SteerTowards(offsetToCenter, maxSteerForce) * aspects[entityIndexA].Settings.ValueRO.CohesionWeight;// + 
-                        //SteerTowards(separationHeading, maxSteerForce) * aspects[entityIndexA].Settings.ValueRO.SeparationWeight;
+                    acceleration +=
+                        SteerTowards(flockHeading, maxSteerForce) * aspects[entityIndexA].Settings.ValueRO.AlignWeight +
+                        SteerTowards(offsetToCenter, maxSteerForce) * aspects[entityIndexA].Settings.ValueRO.CohesionWeight +
+                        SteerTowards(separationHeading, maxSteerForce) * aspects[entityIndexA].Settings.ValueRO.SeparationWeight;
                 }
 
-                //float3 velocity = acceleration * DeltaTime;
-                //float3 dir = math.normalize(velocity);
-                //float speed = math.clamp(math.length(velocity), aspects[entityIndexA].Settings.ValueRO.MinSpeed, aspects[entityIndexA].Settings.ValueRO.MaxSpeed);
-                //velocity = dir * speed;
-                //
-                //aspects[entityIndexA].FlockAgent.ValueRW.Position = aspects[entityIndexA].Transform.ValueRO.Position;
-                //aspects[entityIndexA].FlockAgent.ValueRW.Forward = dir;
+                float3 velocity = acceleration * DeltaTime;
+                float magnitude = math.length(velocity);
 
-                //Set rotation
-                //-HERE-
+                if (magnitude > 0)
+                {
+                    float3 dir = math.normalize(velocity);
+                    float speed = math.clamp(magnitude, aspects[entityIndexA].Settings.ValueRO.MinSpeed, aspects[entityIndexA].Settings.ValueRO.MaxSpeed);
+                    velocity = dir * speed;
 
-                //Set position
-                aspects[entityIndexA].Transform.ValueRW = aspects[entityIndexA].Transform.ValueRW.Translate(acceleration * DeltaTime * 8);
+                    //Debug.Log($"velocity: {velocity}; acceleration:{acceleration}; heading: {flockHeading}; offsetCenter: {centerOfFlockMates}; separation: {separationHeading}");
+                    //Debug.Log($"velocity: {velocity}; acceleration:{acceleration};");
+
+                    aspects[entityIndexA].FlockAgent.ValueRW.Position = aspects[entityIndexA].Transform.ValueRO.Position;
+                    aspects[entityIndexA].FlockAgent.ValueRW.Forward = dir;
+
+                    //Set rotation
+                    //-HERE-
+
+                    //Set position
+                    aspects[entityIndexA].Transform.ValueRW = aspects[entityIndexA].Transform.ValueRW.Translate(velocity * DeltaTime);
+                }
             }
         }
 

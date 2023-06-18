@@ -12,6 +12,7 @@ using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Flowfield_DOTS
 {
@@ -19,6 +20,8 @@ namespace Flowfield_DOTS
     {
         private RefRW<FlowFieldComponent> _flowField;
         private FlockAgentAspect.TypeHandle _aspectTypeHandle;
+
+        //private EntityQueryBuilder queryBuílder;
 
         [BurstCompile]
         void OnCreate(ref SystemState state) 
@@ -55,11 +58,10 @@ namespace Flowfield_DOTS
             //ScheduleParallel causes race conditions
             GetDirectionToTargetJob getTargetDirections = new GetDirectionToTargetJob(_flowField.ValueRW);
             JobHandle moveJobHandle = getTargetDirections.Schedule(state.Dependency);
-
             moveJobHandle.Complete();
 
-            EntityQueryBuilder queryBuílder = new EntityQueryBuilder(Allocator.TempJob).WithAll<FlockAgentTagComponent>();
-            EntityQuery entityQuery = state.GetEntityQuery(queryBuílder);
+            EntityQueryBuilder queryBuilder = new EntityQueryBuilder(Allocator.TempJob).WithAll<FlockAgentTagComponent>();
+            EntityQuery entityQuery = state.GetEntityQuery(queryBuilder);
 
             _aspectTypeHandle.Update(ref state);
 
