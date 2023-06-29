@@ -5,6 +5,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Physics.Aspects;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -33,17 +34,30 @@ namespace Flowfield_DOTS
             {
                 if (spawner.ValueRW.SpawnedInstances < spawner.ValueRW.SpawnCount)
                 {
-                    Entity entity = _buffer.Instantiate(spawner.ValueRW.FlockAgentPrefab);
+                    for (int i = spawner.ValueRW.SpawnedInstances; i < spawner.ValueRW.SpawnCount; i++)
+                    {
+                        Entity entity = _buffer.Instantiate(spawner.ValueRW.FlockAgentPrefab);
 
-                    _buffer.SetComponent(entity, new LocalTransform { Position = new float3(
-                        spawner.ValueRW.SpawnPosition.x + _random.NextFloat(0f, spawner.ValueRW.SpawnRadius),
-                        spawner.ValueRW.SpawnPosition.y,
-                        spawner.ValueRW.SpawnPosition.z + _random.NextFloat(0f, spawner.ValueRW.SpawnRadius)
-                    ), Scale = 1f });
+                        _buffer.SetComponent(entity, new LocalTransform
+                        {
+                            Position = new float3(
+                            spawner.ValueRW.SpawnPosition.x + _random.NextFloat(0f, spawner.ValueRW.SpawnRadius),
+                            spawner.ValueRW.SpawnPosition.y,
+                            spawner.ValueRW.SpawnPosition.z + _random.NextFloat(0f, spawner.ValueRW.SpawnRadius)
+                        ),
+                            Scale = 1f
+                        });
 
-                    //_buffer.AddComponent(entity, new PhysicsVelocity());
+                        //PhysicsMass body = new PhysicsMass();
+                        //body.Transform.pos = new float3(
+                        //    spawner.ValueRW.SpawnPosition.x + _random.NextFloat(0f, spawner.ValueRW.SpawnRadius),
+                        //    spawner.ValueRW.SpawnPosition.y,
+                        //    spawner.ValueRW.SpawnPosition.z + _random.NextFloat(0f, spawner.ValueRW.SpawnRadius));
+                        //
+                        //_buffer.SetComponent(entity, body);
 
-                    spawner.ValueRW.SpawnedInstances++;
+                        spawner.ValueRW.SpawnedInstances++;
+                    }
                 }
             }
         }

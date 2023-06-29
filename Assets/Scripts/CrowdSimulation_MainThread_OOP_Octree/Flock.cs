@@ -89,8 +89,8 @@ namespace CrowdSimulation_OT_OOP
             if (!Application.isPlaying)
                 Gizmos.DrawWireCube(transform.position, Vector3.one * Size);
 
-            //if (Octree != null)
-            //    Octree.DrawAllBounds();
+            if (Octree != null)
+                Octree.DrawAllBounds();
         }
     }
 }

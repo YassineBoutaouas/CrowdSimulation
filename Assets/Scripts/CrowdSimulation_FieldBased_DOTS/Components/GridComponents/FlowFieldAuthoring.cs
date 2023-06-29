@@ -28,6 +28,9 @@ namespace Flowfield_DOTS
         public float3 GridOrigin { get; private set; }
         #endregion
 
+        public enum FlowFieldDebug { Cost, Integration, Flow }
+        public FlowFieldDebug DebugMethod = FlowFieldDebug.Cost;
+
         private FlowFieldComponent _flowField;
 
         private void Awake()
@@ -86,7 +89,7 @@ namespace Flowfield_DOTS
         {
             if (!DebugGrid) return;
 
-            Gizmos.color = Color.grey;
+            Gizmos.color = Color.green;
             Gizmos.DrawWireCube(transform.position, new Vector3(GridSize.x * CellRadius * 2, 10f, GridSize.y * CellRadius * 2));
 
             Vector3 offset = new Vector3(transform.position.x - GridSize.x * CellRadius, transform.position.y, transform.position.z - GridSize.y * CellRadius);
@@ -103,9 +106,23 @@ namespace Flowfield_DOTS
 
                     if (_flowField.Grid.IsCreated && _flowField.Grid.Length > 0)
                     {
-                        //Handles.Label(_flowField.Grid[totalIndex].WorldPosition, _flowField.Grid[totalIndex].Cost.ToString(), style);
-                        //Handles.Label(_flowField.Grid[totalIndex].WorldPosition, _flowField.Grid[totalIndex].BestCost.ToString(), style);
-                        ExtensionMethods.GizmosDrawArrow(_flowField.Grid[totalIndex].WorldPosition, new Vector3(_flowField.Grid[totalIndex].BestDirection.x, 0, _flowField.Grid[totalIndex].BestDirection.y));
+                        switch (DebugMethod)
+                        {
+                            case FlowFieldDebug.Cost:
+                                Handles.Label(_flowField.Grid[totalIndex].WorldPosition, _flowField.Grid[totalIndex].Cost.ToString(), style);
+
+                                break;
+                            case FlowFieldDebug.Integration:
+                                Handles.Label(_flowField.Grid[totalIndex].WorldPosition, _flowField.Grid[totalIndex].BestCost.ToString(), style);
+
+                                break;
+                            case FlowFieldDebug.Flow:
+                                ExtensionMethods.GizmosDrawArrow(_flowField.Grid[totalIndex].WorldPosition, new Vector3(_flowField.Grid[totalIndex].BestDirection.x, 0, _flowField.Grid[totalIndex].BestDirection.y), Color.green);
+
+                                break;
+                            default:
+                                break;
+                        }
 
                         Gizmos.color = _flowField.Grid[totalIndex].Cost == 255 ? Color.red : Color.white;
                     }

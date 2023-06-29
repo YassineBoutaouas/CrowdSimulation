@@ -23,6 +23,8 @@ namespace Flowfield
         public FlowFieldDisplay FlowFieldDisplayType;
         private Color _gizmoColor = Color.green + Color.grey;
 
+        public LayerMask Layer;
+
         private Vector3 lastMouse;
 
         private void Start()
@@ -32,7 +34,7 @@ namespace Flowfield
 
         public void InitializeFlowfield()
         {
-            CurrentFlowField = new Flowfield(CellRadius, GridSize, transform.position);
+            CurrentFlowField = new Flowfield(CellRadius, GridSize, transform.position, Layer);
             CurrentFlowField.CreateGrid(transform.position);
             CurrentFlowField.CreateCostField();
         }

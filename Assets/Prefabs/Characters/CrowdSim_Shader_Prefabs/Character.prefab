@@ -93,12 +93,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb31e730d4bf41a43a0c8045f3b68a14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Acceleration: {x: 0, y: 0, z: 0}
   Position: {x: 0, y: 0, z: 0}
   Forward: {x: 0, y: 0, z: 0}
-  AvgFlockHeading: {x: 0, y: 0, z: 0}
-  AvgAvoidanceHeading: {x: 0, y: 0, z: 0}
   CenterOfFlockmates: {x: 0, y: 0, z: 0}
-  NumPerceivedFlockmates: 0
 --- !u!1 &2569446280957734310
 GameObject:
   m_ObjectHideFlags: 0
@@ -117,7 +115,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &140938219856058717
 Transform:
   m_ObjectHideFlags: 0
@@ -636,7 +634,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 071bbcde7af3d3f4fa4640f627e5febc,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1346693338035923533, guid: 071bbcde7af3d3f4fa4640f627e5febc,
         type: 3}
@@ -919,3 +917,4 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

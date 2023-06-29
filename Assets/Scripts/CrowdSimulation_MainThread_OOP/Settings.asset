@@ -18,5 +18,5 @@ MonoBehaviour:
   AlignWeight: 1
   CohesionWeight: 1
   SeperationWeight: 1
-  TargetWeight: 2
+  TargetWeight: 1
   MoveToCenterDistance: 10

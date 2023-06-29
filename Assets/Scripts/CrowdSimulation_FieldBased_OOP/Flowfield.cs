@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.AI;
@@ -19,11 +20,15 @@ namespace Flowfield
 
         public ProfilerMarker profilerMarker = new ProfilerMarker("Flowfield.Create");
 
-        public Flowfield(float cellRadius, Vector2Int gridSize, Vector3 worldOrigin)
+        public LayerMask Layer;
+
+        public Flowfield(float cellRadius, Vector2Int gridSize, Vector3 worldOrigin, LayerMask layer)
         {
             CellRadius = cellRadius;
             CellDiameter = cellRadius * 2f;
             GridSize = gridSize;
+
+            Layer = layer;
 
             GridOrigin = new Vector3(worldOrigin.x - GridSize.x * CellRadius, worldOrigin.y, worldOrigin.z - GridSize.y * CellRadius);
         }
@@ -48,17 +53,29 @@ namespace Flowfield
             {
                 for (int y = 0; y < GridSize.y; y++)
                 {
-                    if (!NavMesh.SamplePosition(Grid[x, y].WorldPosition, out NavMeshHit _, CellRadius * 1.5f, NavMesh.AllAreas))
-                        Grid[x, y].SetCost(255);
-                    else
-                        Grid[x, y].SetCost(1);
+                    Vector3 worldPos = Grid[x, y].WorldPosition;
+
+                    byte cost = 1;
+                    if (Physics.OverlapBox(worldPos, CellRadius * Vector3.one, Quaternion.identity, Layer).Length > 0)
+                    {
+                        cost = 255;
+                    }
+
+                    Grid[x, y].SetCost(cost);
+
+
+                    //if (!NavMesh.SamplePosition(Grid[x, y].WorldPosition, out NavMeshHit _, CellRadius * 1.5f, NavMesh.AllAreas))
+                    //    Grid[x, y].SetCost(255);
+                    //else
+                    //    Grid[x, y].SetCost(1);
                 }
             }
         }
 
         public void CreateIntegrationField(Cell destination)
         {
-            foreach(Cell c in Grid){
+            foreach (Cell c in Grid)
+            {
                 c.BestCost = ushort.MaxValue;
             }
 
@@ -173,6 +190,8 @@ namespace Flowfield
         public static void GizmosDrawArrow(Vector3 pos, Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
         {
             Gizmos.DrawRay(pos, direction);
+
+            if (direction.sqrMagnitude == 0) return;
 
             Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 + arrowHeadAngle, 0) * new Vector3(0, 0, 1);
             Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 - arrowHeadAngle, 0) * new Vector3(0, 0, 1);

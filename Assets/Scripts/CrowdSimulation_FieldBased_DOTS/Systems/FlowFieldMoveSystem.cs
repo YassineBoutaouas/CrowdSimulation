@@ -62,6 +62,7 @@ namespace Flowfield_DOTS
 
             EntityQueryBuilder queryBuilder = new EntityQueryBuilder(Allocator.TempJob).WithAll<FlockAgentTagComponent>();
             EntityQuery entityQuery = state.GetEntityQuery(queryBuilder);
+            //state.
 
             _aspectTypeHandle.Update(ref state);
 
