@@ -1073,7 +1073,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &947443643
 Transform:
   m_ObjectHideFlags: 0
@@ -1916,7 +1916,7 @@ GameObject:
   - component: {fileID: 1857387355}
   - component: {fileID: 1857387356}
   m_Layer: 0
-  m_Name: Crowds_OOP_OT
+  m_Name: Crowds_OOP_Octree
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2036,5 +2036,5 @@ MonoBehaviour:
     y: 100
   CellRadius: 1
   Goal: {fileID: 1619474276}
-  DebugGrid: 1
+  DebugGrid: 0
   DebugMethod: 2
