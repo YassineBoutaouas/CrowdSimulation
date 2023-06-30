@@ -1,4 +1,3 @@
-using Global.Positioning;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,8 +10,6 @@ namespace CrowdSimulation_Shader
         public Transform Target { get; private set; }
 
         private Animator _animator;
-        private BoxFormation _boxFormation;
-        private int _positionIndex;
         public bool _hasReachedTarget { get; private set; }
         
         public NavMeshPath PathToTarget;
@@ -39,11 +36,9 @@ namespace CrowdSimulation_Shader
             _cachedTransform = transform;
         }
 
-        public void Initialize(FlockSettings settings, Transform target, BoxFormation boxFormation, int positionIndex)
+        public void Initialize(FlockSettings settings, Transform target, int positionIndex)
         {
             PathToTarget = new NavMeshPath();
-            _boxFormation = boxFormation;
-            _positionIndex = positionIndex;
 
             _animator = GetComponent<Animator>();
 

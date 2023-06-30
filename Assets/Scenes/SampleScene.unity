@@ -258,7 +258,7 @@ MonoBehaviour:
   GridSize: {x: 100, y: 100}
   CellRadius: 1
   Goal: {fileID: 1404367820}
-  DebugGrid: 1
+  DebugGrid: 0
   FlowFieldDisplayType: 1
   Layer:
     serializedVersion: 2
@@ -879,7 +879,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 808587792}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 29.1, y: 0.5, z: -29.5}
+  m_LocalPosition: {x: 61, y: 0.5, z: -59.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -907,12 +907,6 @@ MonoBehaviour:
   SpawnCount: 100
   Settings: {fileID: 11400000, guid: 586ce10d27072444bab6650c356d6f9f, type: 2}
   _target: {fileID: 565107559}
-  _boxFormation:
-    Noise: 0
-    Spread: 1
-    Positions: []
-    RowLength: 5
-    Hollow: 0
 --- !u!1 &809093989
 GameObject:
   m_ObjectHideFlags: 0
@@ -1073,7 +1067,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &947443643
 Transform:
   m_ObjectHideFlags: 0
@@ -1188,12 +1182,6 @@ MonoBehaviour:
   SpawnCount: 100
   Settings: {fileID: 11400000, guid: 3ca4ddbae0d85af489b19446830ef3d0, type: 2}
   _target: {fileID: 1087871247}
-  _boxFormation:
-    Noise: 0.5
-    Spread: 1.5
-    Positions: []
-    RowLength: 100
-    Hollow: 0
 --- !u!1 &1087871246
 GameObject:
   m_ObjectHideFlags: 0
@@ -1868,12 +1856,6 @@ MonoBehaviour:
   SpawnCount: 100
   Settings: {fileID: 11400000, guid: 9c521fa583035c24a9d8f73e77d43808, type: 2}
   _target: {fileID: 1931240985}
-  _boxFormation:
-    Noise: 0.7
-    Spread: 1.5
-    Positions: []
-    RowLength: 15
-    Hollow: 0
 --- !u!1 &1847397270
 GameObject:
   m_ObjectHideFlags: 0

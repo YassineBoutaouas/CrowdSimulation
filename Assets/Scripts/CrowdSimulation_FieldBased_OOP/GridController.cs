@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -37,29 +34,16 @@ namespace Flowfield
             CurrentFlowField = new Flowfield(CellRadius, GridSize, transform.position, Layer);
             CurrentFlowField.CreateGrid(transform.position);
             CurrentFlowField.CreateCostField();
-        }
 
-        private void Update()
-        {
-            if (Input.GetMouseButtonDown(0))
-            {
-                //CurrentFlowField.CreateCostField();
-                CurrentFlowField.profilerMarker.Begin();
-                CurrentFlowField.SetDestination(Goal.position);
-                CurrentFlowField.CreateFlowField();
-                CurrentFlowField.profilerMarker.End();
-
-                Debug.Log("New flowfield");
-            }
+            CurrentFlowField.profilerMarker.Begin();
+            CurrentFlowField.SetDestination(Goal.position);
+            CurrentFlowField.CreateFlowField();
+            CurrentFlowField.profilerMarker.End();
         }
 
 #if UNITY_EDITOR
         public void OnDrawGizmosSelected()
         {
-            //if (!Application.isPlaying)
-            //{
-            //    Gizmos.DrawWireCube(transform.position, new Vector3(GridSize.x * CellRadius * 2, 2, GridSize.y * CellRadius * 2));
-            //}
             //
             if (!DebugGrid) return;
 
@@ -102,11 +86,6 @@ namespace Flowfield
                     Gizmos.DrawWireCube(center, Vector3.one * cellDiameter);
                 }
             }
-            //
-            //Gizmos.color = Color.blue;
-            //if (CurrentFlowField != null)
-            //    if (CurrentFlowField.Destination != null)
-            //        Gizmos.DrawSphere(CurrentFlowField.Destination.WorldPosition, CurrentFlowField.CellRadius);
         }
 #endif
     }

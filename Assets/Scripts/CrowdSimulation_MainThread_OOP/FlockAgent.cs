@@ -1,4 +1,3 @@
-using Global.Positioning;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Profiling;
@@ -37,20 +36,15 @@ namespace CrowdSimulation_OOP
         public Transform Target { get; private set; }
         public bool _hasReachedTarget { get; private set; }
 
-        private BoxFormation _boxFormation;
-        private int _positionIndex;
-
         private void Awake()
         {
             _agent = GetComponent<NavMeshAgent>();
             _cachedTransform = transform;
         }
 
-        public void Initialize(FlockSettings settings, FlockSpawner spawner, Transform target, BoxFormation boxFormation, int positionIndex)
+        public void Initialize(FlockSettings settings, FlockSpawner spawner, Transform target, int positionIndex)
         {
             _pathToTarget = new NavMeshPath();
-            _boxFormation = boxFormation;
-            _positionIndex = positionIndex;
             _flockSpawner = spawner;
 
             _animator = GetComponent<Animator>();

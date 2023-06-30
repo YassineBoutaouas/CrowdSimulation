@@ -1,4 +1,3 @@
-using Global.Positioning;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Profiling;
@@ -37,7 +36,6 @@ namespace CrowdSimulation_OT_OOP
         public Transform Target { get; private set; }
         public bool _hasReachedTarget { get; private set; }
 
-        private BoxFormation _boxFormation;
         private int _positionIndex;
 
         private void Awake()
@@ -46,10 +44,9 @@ namespace CrowdSimulation_OT_OOP
             _cachedTransform = transform;
         }
 
-        public void Initialize(FlockSettings settings, FlockSpawner spawner, Transform target, BoxFormation boxFormation, int positionIndex)
+        public void Initialize(FlockSettings settings, FlockSpawner spawner, Transform target, int positionIndex)
         {
             _pathToTarget = new NavMeshPath();
-            _boxFormation = boxFormation;
             _positionIndex = positionIndex;
             _flockSpawner = spawner;
 
@@ -75,16 +72,6 @@ namespace CrowdSimulation_OT_OOP
 
             if (Target != null)
             {
-                // if (Vector3.Distance(transform.position, Target.position) < _settings.MoveToCenterDistance)
-                // {
-                //     _agent.ResetPath();
-                //     _hasReachedTarget = true;
-                //     _agent.SetDestination(_boxFormation.Positions[_positionIndex]);
-                //     _flockSpawner.TargetReached();
-                // }
-
-                // if (_hasReachedTarget) return;
-
                 _agent.CalculatePath(Target.position, _pathToTarget);
             }
 

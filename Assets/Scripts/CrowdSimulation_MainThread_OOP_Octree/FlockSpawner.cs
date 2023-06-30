@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Global.Positioning;
 using UnityEngine;
 
 namespace CrowdSimulation_OT_OOP
@@ -17,8 +16,6 @@ namespace CrowdSimulation_OT_OOP
 
         private Vector3 _previousTargetPos;
 
-        public BoxFormation _boxFormation;
-
         public event Action OnTargetPositionChanged;
         public event Action OnTargetReached;
         public void TargetReached(){ OnTargetReached?.Invoke(); }
@@ -28,7 +25,6 @@ namespace CrowdSimulation_OT_OOP
             if (_target != null)
             {
                 _previousTargetPos = _target.position;
-                _boxFormation.EvaluatePoints(SpawnCount, _target.position);
             }
 
             Spawn();
@@ -40,7 +36,6 @@ namespace CrowdSimulation_OT_OOP
             
             if (_previousTargetPos == _target.position) return;
 
-            _boxFormation.EvaluatePoints(SpawnCount, _target.position);
             _previousTargetPos = _target.position;
 
             OnTargetPositionChanged?.Invoke();
@@ -53,7 +48,7 @@ namespace CrowdSimulation_OT_OOP
                 Vector2 pos = UnityEngine.Random.insideUnitCircle * SpawnRadius;
                 FlockAgent agent = Instantiate(AgentPrefabs[UnityEngine.Random.Range(0, AgentPrefabs.Count)], new Vector3(transform.position.x + pos.x, transform.position.y, transform.position.z + pos.y), Quaternion.LookRotation(UnityEngine.Random.insideUnitCircle, Vector3.up), transform);
                 agent.name = $"Agent_{i}";
-                agent.Initialize(Settings, this, _target, _boxFormation, i);
+                agent.Initialize(Settings, this, _target, i);
 
                 OnTargetPositionChanged += agent.ChangeTargetState;
 
@@ -64,7 +59,6 @@ namespace CrowdSimulation_OT_OOP
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.cyan;
-            _boxFormation.OnDrawGizmosSelected();
             Gizmos.DrawWireSphere(transform.position, SpawnRadius);
         }
     }
