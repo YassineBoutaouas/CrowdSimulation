@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace CrowdSimulation_OT_OOP
 {
+    /// <summary>
+    /// Spawns FlockAgent instances
+    /// </summary>
     public class FlockSpawner : MonoBehaviour
     {
         public List<FlockAgent> AgentPrefabs = new List<FlockAgent>();
@@ -14,32 +17,7 @@ namespace CrowdSimulation_OT_OOP
         public FlockSettings Settings;
         public Transform _target;
 
-        private Vector3 _previousTargetPos;
-
-        public event Action OnTargetPositionChanged;
-        public event Action OnTargetReached;
-        public void TargetReached(){ OnTargetReached?.Invoke(); }
-
-        private void Start()
-        {
-            if (_target != null)
-            {
-                _previousTargetPos = _target.position;
-            }
-
-            Spawn();
-        }
-
-        private void Update()
-        {
-            if(_target == null) return;
-            
-            if (_previousTargetPos == _target.position) return;
-
-            _previousTargetPos = _target.position;
-
-            OnTargetPositionChanged?.Invoke();
-        }
+        private void Start() { Spawn(); }
 
         public void Spawn()
         {
@@ -48,9 +26,7 @@ namespace CrowdSimulation_OT_OOP
                 Vector2 pos = UnityEngine.Random.insideUnitCircle * SpawnRadius;
                 FlockAgent agent = Instantiate(AgentPrefabs[UnityEngine.Random.Range(0, AgentPrefabs.Count)], new Vector3(transform.position.x + pos.x, transform.position.y, transform.position.z + pos.y), Quaternion.LookRotation(UnityEngine.Random.insideUnitCircle, Vector3.up), transform);
                 agent.name = $"Agent_{i}";
-                agent.Initialize(Settings, this, _target, i);
-
-                OnTargetPositionChanged += agent.ChangeTargetState;
+                agent.Initialize(Settings, this, _target);
 
                 Flock.Instance.Agents.Add(agent);
             }

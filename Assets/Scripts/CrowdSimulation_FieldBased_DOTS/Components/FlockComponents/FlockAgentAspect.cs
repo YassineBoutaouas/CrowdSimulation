@@ -1,20 +1,19 @@
 using Unity.Entities;
-using Unity.Physics;
 using Unity.Transforms;
 
 namespace Flowfield_DOTS
 {
+    /// <summary>
+    /// Aspect storing references to the DOTS components: 
+    /// Transform, Settings, FlockAgent, TagComponent
+    /// </summary>
     public readonly partial struct FlockAgentAspect : IAspect
     {
-        private readonly Entity _entity;
-
         public readonly RefRW<LocalTransform> Transform;
 
         public readonly RefRO<FlockAgentSettingsComponent> Settings;
         public readonly RefRW<FlockAgentComponent> FlockAgent;
 
         public readonly RefRO<FlockAgentTagComponent> TagComponent;
-
-        //public readonly RefRO<PhysicsVelocity> Rigidbody;
     }
 }

@@ -1,19 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Burst;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Physics;
-using Unity.Physics.Aspects;
 using Unity.Transforms;
-using UnityEngine;
 
 namespace Flowfield_DOTS
 {
+    /// <summary>
+    /// Handles the spawning of flock agent instances
+    /// </summary>
     public partial class SpawnFlockSystem : SystemBase
     {
-        private Unity.Mathematics.Random _random;
+        private Random _random;
 
         private BeginSimulationEntityCommandBufferSystem.Singleton _beginSimulationCommanBufferSystem;
 
@@ -30,6 +26,7 @@ namespace Flowfield_DOTS
         {
             _buffer = _beginSimulationCommanBufferSystem.CreateCommandBuffer(World.Unmanaged);
 
+            //Spawn flock agent instances for each spawner in the scene
             foreach (RefRW<FlockSpawnerComponent> spawner in SystemAPI.Query<RefRW<FlockSpawnerComponent>>())
             {
                 if (spawner.ValueRW.SpawnedInstances < spawner.ValueRW.SpawnCount)
@@ -47,14 +44,6 @@ namespace Flowfield_DOTS
                         ),
                             Scale = 1f
                         });
-
-                        //PhysicsMass body = new PhysicsMass();
-                        //body.Transform.pos = new float3(
-                        //    spawner.ValueRW.SpawnPosition.x + _random.NextFloat(0f, spawner.ValueRW.SpawnRadius),
-                        //    spawner.ValueRW.SpawnPosition.y,
-                        //    spawner.ValueRW.SpawnPosition.z + _random.NextFloat(0f, spawner.ValueRW.SpawnRadius));
-                        //
-                        //_buffer.SetComponent(entity, body);
 
                         spawner.ValueRW.SpawnedInstances++;
                     }

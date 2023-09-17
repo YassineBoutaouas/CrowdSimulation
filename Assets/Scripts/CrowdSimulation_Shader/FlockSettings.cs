@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace CrowdSimulation_Shader
 {
+    /// <summary>
+    /// Contains movement settings
+    /// </summary>
     [CreateAssetMenu(menuName = "Flock/Settings/ShaderSolution")]
     public class FlockSettings : ScriptableObject
     {

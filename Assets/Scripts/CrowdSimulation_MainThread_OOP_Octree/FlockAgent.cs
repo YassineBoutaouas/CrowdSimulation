@@ -4,11 +4,12 @@ using UnityEngine.Profiling;
 
 namespace CrowdSimulation_OT_OOP
 {
+    /// <summary>
+    /// Represents a single FlockAgent
+    /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
     public class FlockAgent : MonoBehaviour
     {
-        private FlockSpawner _flockSpawner;
-        private Animator _animator;
         private NavMeshPath _pathToTarget;
         private FlockSettings _settings;
         private NavMeshAgent _agent;
@@ -34,9 +35,6 @@ namespace CrowdSimulation_OT_OOP
         public int NumPerceivedFlockmates;
 
         public Transform Target { get; private set; }
-        public bool _hasReachedTarget { get; private set; }
-
-        private int _positionIndex;
 
         private void Awake()
         {
@@ -44,13 +42,9 @@ namespace CrowdSimulation_OT_OOP
             _cachedTransform = transform;
         }
 
-        public void Initialize(FlockSettings settings, FlockSpawner spawner, Transform target, int positionIndex)
+        public void Initialize(FlockSettings settings, FlockSpawner spawner, Transform target)
         {
             _pathToTarget = new NavMeshPath();
-            _positionIndex = positionIndex;
-            _flockSpawner = spawner;
-
-            _animator = GetComponent<Animator>();
 
             Target = target;
             _settings = settings;
@@ -64,6 +58,9 @@ namespace CrowdSimulation_OT_OOP
             _agent.speed = Mathf.Lerp(_settings.MinSpeed, _settings.MaxSpeed, Random.Range(0f, 1f));
         }
 
+        /// <summary>
+        /// Calculates the velocity according to the behavioral model
+        /// </summary>
         public void UpdateVelocity()
         {
             Profiler.BeginSample("FlockAgent.UpdateForces");
@@ -71,9 +68,7 @@ namespace CrowdSimulation_OT_OOP
             Vector3 acceleration = Vector3.zero;
 
             if (Target != null)
-            {
                 _agent.CalculatePath(Target.position, _pathToTarget);
-            }
 
             if (_pathToTarget.corners.Length >= 1)
             {
@@ -81,6 +76,7 @@ namespace CrowdSimulation_OT_OOP
                 acceleration = SteerTowards(offsetToTarget) * _settings.TargetWeight;
             }
 
+            //Calculate cohesion, alignment and separation
             if (NumPerceivedFlockmates != 0)
             {
                 CenterOfFlockmates /= NumPerceivedFlockmates;
@@ -111,13 +107,9 @@ namespace CrowdSimulation_OT_OOP
             Profiler.EndSample();
         }
 
-        public void ChangeTargetState()
-        {
-            _agent.isStopped = false;
-            _agent.ResetPath();
-            _hasReachedTarget = false;
-        }
-
+        /// <summary>
+        /// Calculates the steering velocity
+        /// </summary>
         private Vector3 SteerTowards(Vector3 vector)
         {
             Vector3 v = vector.normalized * _settings.MaxSpeed - _velocity;

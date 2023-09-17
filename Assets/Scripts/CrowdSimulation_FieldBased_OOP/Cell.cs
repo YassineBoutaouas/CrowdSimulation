@@ -1,9 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Flowfield
 {
+    /// <summary>
+    /// Represents a cell in a given flowfield
+    /// </summary>
     public class Cell
     {
         public Vector3 WorldPosition;

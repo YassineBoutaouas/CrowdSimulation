@@ -1,13 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Scenes;
 using UnityEngine;
 
 namespace Flowfield_DOTS
 {
+    /// <summary>
+    /// MonoBehavior component containing spawn properties
+    /// </summary>
     public class FlockSpawnerAuthoring : MonoBehaviour
     {
         public GameObject FlockAgentPrefab;
@@ -27,6 +26,9 @@ namespace Flowfield_DOTS
         }
     }
 
+    /// <summary>
+    /// DOTS component containing spawn properties for each flock
+    /// </summary>
     public struct FlockSpawnerComponent : IComponentData
     {
         public Entity FlockAgentPrefab;

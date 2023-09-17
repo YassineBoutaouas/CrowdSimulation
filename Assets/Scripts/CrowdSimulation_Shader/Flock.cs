@@ -4,12 +4,13 @@ using UnityEngine.Profiling;
 
 namespace CrowdSimulation_Shader
 {
+    /// <summary>
+    /// Manages FlockAgent instances
+    /// </summary>
     public class Flock : MonoBehaviour
     {
         public static Flock Instance;
-
         public List<FlockAgent> Agents = new List<FlockAgent>();
-
         public FlockSettings Settings;
 
         [Space()]
@@ -21,6 +22,7 @@ namespace CrowdSimulation_Shader
         { 
             Instance = this;
 
+            //References a shader and passes initial values
             shader.SetFloat("viewRadius", Settings.PerceptionRadius);
             shader.SetFloat("avoidRadius", Settings.AvoidanceRadius);
 
@@ -51,7 +53,7 @@ namespace CrowdSimulation_Shader
                     agentData[i].TargetPosition = Agents[i].PathToTarget.corners[1];
             }
 
-            ///---Agent shader data------------------------------------------------------
+            //Creates a compute buffer and passes the values - paths are calculated on the main thread
             _agentBuffer = new ComputeBuffer(numAgents, AgentData.Size);
             _agentBuffer.SetData(agentData);
 
@@ -81,6 +83,9 @@ namespace CrowdSimulation_Shader
         }
     }
 
+    /// <summary>
+    /// To be passed to a shader. Contains the values held by a FlockAgent instance
+    /// </summary>
     public struct AgentData
     {
         public Vector3 Position;
@@ -91,15 +96,11 @@ namespace CrowdSimulation_Shader
 
         public Vector3 Acceleration;
 
-        //public Vector3 FlockHeading;
-        //public Vector3 SeparationHeading;
-        //public int NumFlockMates;
-
         public static int Size
         {
             get
             {
-                return sizeof(float) * 3 * 5; //7 + sizeof(int); //For seven vectors and one integer
+                return sizeof(float) * 3 * 5;
             }
         }
     }

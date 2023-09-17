@@ -3,7 +3,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.AI;
 using Unity.Transforms;
 using Unity.AI.Navigation;
 
@@ -13,6 +12,9 @@ using UnityEditor;
 
 namespace Flowfield_DOTS
 {
+    /// <summary>
+    /// Wrapper class containing methods to initialize an unmanaged flowfield (Mirror object for debugging)
+    /// </summary>
     public class FlowFieldAuthoring : MonoBehaviour
     {
         #region Grid properties
@@ -50,9 +52,14 @@ namespace Flowfield_DOTS
             Entity entity = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntity();
             World.DefaultGameObjectInjectionWorld.EntityManager.AddComponentData(entity, _flowField);
 
-            //Object might be destroyed, is kept for debugging however
+            //Component may be destroyed, is kept for debugging
         }
 
+        /// <summary>
+        /// Uses the default Physics API to configure walkable areas that can then be passed to an unmanaged flowfield component.
+        /// Asumes that the flowfield is static without moving environment objects
+        /// </summary>
+        /// <returns></returns>
         private NativeArray<Cell> CreateGrid()
         {
             NativeArray<Cell> result = new NativeArray<Cell>(GridSize.x * GridSize.y, Allocator.Persistent);
@@ -65,7 +72,8 @@ namespace Flowfield_DOTS
                     float3 worldPos = new float3((_cellDiameter * x + CellRadius) + GridOrigin.x, GridOrigin.y, (_cellDiameter * y + CellRadius) + GridOrigin.z);
 
                     byte cost = 1;
-                    foreach(Collider collider in Physics.OverlapBox(worldPos, CellRadius * Vector3.one)) //(!NavMesh.SamplePosition(worldPos, out NavMeshHit _, CellRadius * 1.5f, NavMesh.AllAreas))
+
+                    foreach(Collider collider in Physics.OverlapBox(worldPos, CellRadius * Vector3.one))
                     {
                         if (!collider.TryGetComponent(out NavMeshSurface _))
                         {
@@ -85,6 +93,9 @@ namespace Flowfield_DOTS
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// Debugs the given flowfield from the managed part of Unity
+        /// </summary>
         private void OnDrawGizmosSelected()
         {
             if (!DebugGrid) return;
@@ -134,6 +145,9 @@ namespace Flowfield_DOTS
 #endif
     }
 
+    /// <summary>
+    /// DOTS component containing a flowfield
+    /// </summary>
     public struct FlowFieldComponent : IComponentData
     {
         public NativeArray<Cell> Grid;

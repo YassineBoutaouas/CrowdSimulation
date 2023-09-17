@@ -1,9 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Global
 {
+    /// <summary>
+    /// Contains general extension and helper methods
+    /// </summary>
     public static class ExtensionMethods
     {
         public static float Remap(this float value, float from1, float to1, float from2, float to2)

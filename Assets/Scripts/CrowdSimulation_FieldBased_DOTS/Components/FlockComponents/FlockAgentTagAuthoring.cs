@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
@@ -16,5 +14,8 @@ namespace Flowfield_DOTS
         }
     }
 
+    /// <summary>
+    /// Empty DOTS component used for object instancing
+    /// </summary>
     public struct FlockAgentTagComponent : IComponentData { }
 }

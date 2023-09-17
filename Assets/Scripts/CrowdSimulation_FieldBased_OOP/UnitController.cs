@@ -5,6 +5,9 @@ using UnityEngine.AI;
 
 namespace Flowfield
 {
+    /// <summary>
+    /// Responsible for spawning units
+    /// </summary>
     public class UnitController : MonoBehaviour
     {
         public GridController Grid;
@@ -28,7 +31,7 @@ namespace Flowfield
         {
             for (int i = 0; i < SpawnCount; i++)
             {
-                Vector2 pos = UnityEngine.Random.insideUnitCircle * SpawnRadius;
+                Vector2 pos = Random.insideUnitCircle * SpawnRadius;
                 GameObject agent = Instantiate(UnitPrefab, new Vector3(transform.position.x + pos.x, transform.position.y, transform.position.z + pos.y), Quaternion.LookRotation(UnityEngine.Random.insideUnitCircle, Vector3.up), transform);
                 agent.name = $"Agent_{i}";
 
@@ -48,13 +51,6 @@ namespace Flowfield
             
                 obj.transform.position += Time.deltaTime * MoveSpeed * move;
             }
-
-            //for(int i = 0; i< UnitsInGame.Count; i++)
-            //{
-            //    UnitsInGame[i].CalculatePath(Grid.Goal.position, Paths[i]);
-            //
-            //    UnitsInGame[i].SetPath(Paths[i]);
-            //}
 
             ProfilerMarker.End();
         }

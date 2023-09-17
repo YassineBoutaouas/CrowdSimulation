@@ -1,11 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Flowfield_DOTS
 {
+    /// <summary>
+    /// MonoBehavior component containing FlockAgent data
+    /// </summary>
     public class FlockAgentAuthoring : MonoBehaviour
     {
         public float3 Position;
@@ -26,12 +27,13 @@ namespace Flowfield_DOTS
         public override void Bake(FlockAgentAuthoring authoring)
         {
             Entity e = GetEntity(authoring, TransformUsageFlags.Dynamic);
-
-
             AddComponent(e, new FlockAgentComponent(authoring.Position, authoring.Forward, authoring.AvgFlockHeading, authoring.AvgAvoidanceHeading, authoring.CenterOfFlockmates, authoring.Velocity));
         }
     }
 
+    /// <summary>
+    /// DOTS component containing FlockAgent data
+    /// </summary>
     public struct FlockAgentComponent : IComponentData
     {
         public float2 CurrentDirection;

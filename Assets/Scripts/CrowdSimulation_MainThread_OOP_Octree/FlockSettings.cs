@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace CrowdSimulation_OT_OOP
 {
+    /// <summary>
+    /// Contains movement settings
+    /// </summary>
     [CreateAssetMenu(menuName = "Flock/Settings/OOP_OT")]
     public class FlockSettings : ScriptableObject
     {

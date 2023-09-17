@@ -1,4 +1,4 @@
-// Each #kernel tells which function to compile; you can have many kernels
+// Each #kernel tells which function to compile
 #pragma kernel CSMain
 static const int threadGroupSize = 1024;
 
@@ -26,6 +26,7 @@ float alignWeight;
 float cohesionWeight;
 float separationWeight;
 
+//Calculate steering velocity
 float3 SteerTowards(float3 velocity)
 {
     float len = clamp(length(velocity), 0, maxSteerForce);
@@ -54,6 +55,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float3 flockHeading = float3(0,0,0);
     float3 separationHeading = float3(0,0,0);
 
+    //calculates the behavioral model - cohesion, alignment, separation
     for (uint indexB = 0; indexB < numAgents; indexB++)
     {
         if(id.x != indexB)

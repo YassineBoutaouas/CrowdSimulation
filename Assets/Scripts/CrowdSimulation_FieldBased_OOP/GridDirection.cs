@@ -1,10 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace Flowfield
 {
+    /// <summary>
+    /// Helperclass that defines cardinal and intercardinal directions
+    /// </summary>
     public class GridDirection
     {
         public readonly Vector2Int Vector;

@@ -1,25 +1,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
-using Unity.Profiling;
 
 namespace CrowdSimulation_OOP
 {
-
+    /// <summary>
+    /// Manages FlockAgent instances and applies the flocking behaviors
+    /// </summary>
     public class Flock : MonoBehaviour
     {
         public static Flock Instance;
         public List<FlockAgent> Agents = new List<FlockAgent>();
 
-
         [Header("NeighborIteration_Settings"), Space()]
         public float PerceptionRadius;
         public float AvoidanceRadius;
 
-        private void Awake()
-        {
-            Instance = this;
-        }
+        private void Awake() { Instance = this; }
 
         private void Update()
         {
@@ -29,6 +26,8 @@ namespace CrowdSimulation_OOP
 
             int numAgents = Agents.Count;
 
+            //Bruteforce method O(n)^2
+            //calculates alignment, cohesion, separation and a path
             for (int i = 0; i < numAgents; i++)
             {
                 FlockAgent agentA = Agents[i];

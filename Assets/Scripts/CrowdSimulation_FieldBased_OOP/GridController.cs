@@ -6,7 +6,9 @@ using UnityEditor;
 
 namespace Flowfield
 {
-
+    /// <summary>
+    /// Creates, references and visualizes a flowfield
+    /// </summary>
     public class GridController : MonoBehaviour
     {
         public Vector2Int GridSize;
@@ -18,33 +20,24 @@ namespace Flowfield
         public bool DebugGrid;
         public enum FlowFieldDisplay { None, Cost, Integration, Flow }
         public FlowFieldDisplay FlowFieldDisplayType;
-        private Color _gizmoColor = Color.green + Color.grey;
 
         public LayerMask Layer;
 
-        private Vector3 lastMouse;
-
         private void Start()
-        {
-            InitializeFlowfield();
-        }
-
-        public void InitializeFlowfield()
         {
             CurrentFlowField = new Flowfield(CellRadius, GridSize, transform.position, Layer);
             CurrentFlowField.CreateGrid(transform.position);
-            CurrentFlowField.CreateCostField();
+            CurrentFlowField.CreateCostField(); //Assumes that the map is static
 
             CurrentFlowField.profilerMarker.Begin();
             CurrentFlowField.SetDestination(Goal.position);
-            CurrentFlowField.CreateFlowField();
+            CurrentFlowField.CreateFlowField(); //May be created whenever the goal position has changed
             CurrentFlowField.profilerMarker.End();
         }
 
 #if UNITY_EDITOR
         public void OnDrawGizmosSelected()
         {
-            //
             if (!DebugGrid) return;
 
             GUIStyle style = new GUIStyle(GUI.skin.label);

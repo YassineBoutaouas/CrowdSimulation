@@ -1,12 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
-using Unity.AI.Navigation;
 using Unity.Profiling;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Flowfield
 {
+    /// <summary>
+    /// Contains methods to create a flowfield
+    /// </summary>
     public class Flowfield
     {
         public Cell[,] Grid { get; private set; }
@@ -47,6 +47,9 @@ namespace Flowfield
             }
         }
 
+        /// <summary>
+        /// Creates an initial cost field based on physics layer overlap tests
+        /// </summary>
         public void CreateCostField()
         {
             for (int x = 0; x < GridSize.x; x++)
@@ -62,16 +65,13 @@ namespace Flowfield
                     }
 
                     Grid[x, y].SetCost(cost);
-
-
-                    //if (!NavMesh.SamplePosition(Grid[x, y].WorldPosition, out NavMeshHit _, CellRadius * 1.5f, NavMesh.AllAreas))
-                    //    Grid[x, y].SetCost(255);
-                    //else
-                    //    Grid[x, y].SetCost(1);
                 }
             }
         }
 
+        /// <summary>
+        /// Creates an integration field based on the given cost field
+        /// </summary>
         public void CreateIntegrationField(Cell destination)
         {
             foreach (Cell c in Grid)
@@ -95,7 +95,7 @@ namespace Flowfield
                 foreach (Cell currNeighbor in currNeighbors)
                 {
                     if (currNeighbor.Cost == byte.MaxValue) continue;
-                    if (currNeighbor.Cost + currCell.BestCost < currNeighbor.BestCost) //accumulative cost
+                    if (currNeighbor.Cost + currCell.BestCost < currNeighbor.BestCost)
                     {
                         currNeighbor.BestCost = (ushort)(currNeighbor.Cost + currCell.BestCost);
                         cellsToCheck.Enqueue(currNeighbor);
@@ -104,6 +104,9 @@ namespace Flowfield
             }
         }
 
+        /// <summary>
+        /// Creates a flow field based on the given integration field
+        /// </summary>
         public void CreateFlowField()
         {
             foreach (Cell c in Grid)
@@ -130,6 +133,9 @@ namespace Flowfield
             CreateIntegrationField(destinationCell);
         }
 
+        /// <summary>
+        /// Returns the cells in each given cardinal direction
+        /// </summary>
         private List<Cell> GetNeighborCells(Vector2Int gridIndex, List<GridDirection> directions)
         {
             List<Cell> neighbors = new List<Cell>();
@@ -144,6 +150,9 @@ namespace Flowfield
             return neighbors;
         }
 
+        /// <summary>
+        /// Retrieves a cell at a relative position
+        /// </summary>
         private Cell GetCellAtRelativePos(Vector2Int originPos, Vector2Int relativePos)
         {
             Vector2Int finalPos = originPos + relativePos;
@@ -153,6 +162,9 @@ namespace Flowfield
             return Grid[finalPos.x, finalPos.y];
         }
 
+        /// <summary>
+        /// Retrieves a cell from an absolute world position
+        /// </summary>
         public Cell GetCellFromWorldPosition(Vector3 worldPos)
         {
             float percentX = (worldPos.x) / (GridSize.x * CellDiameter);
@@ -170,6 +182,9 @@ namespace Flowfield
         }
     }
 
+    /// <summary>
+    /// Contains global extension methods
+    /// </summary>
     public static class FlowfieldExtensions
     {
         public static float Remap(this float value, float from1, float to1, float from2, float to2)

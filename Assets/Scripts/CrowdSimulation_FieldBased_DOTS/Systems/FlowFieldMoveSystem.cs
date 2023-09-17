@@ -1,31 +1,21 @@
-using Flowfield;
-using Global;
-using JetBrains.Annotations;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-using Unity.Mathematics;
-using Unity.Physics;
-using Unity.Physics.Systems;
-using Unity.Transforms;
-using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Flowfield_DOTS
 {
+    /// <summary>
+    /// Handles movement and flocking jobs executions and orders
+    /// </summary>
     public partial struct FlockingSystem : ISystem
     {
         private RefRW<FlowFieldComponent> _flowField;
         private FlockAgentAspect.TypeHandle _aspectTypeHandle;
 
-        //private EntityQueryBuilder queryBuílder;
-
         [BurstCompile]
-        void OnCreate(ref SystemState state) 
-        { 
+        void OnCreate(ref SystemState state)
+        {
             _aspectTypeHandle = new FlockAgentAspect.TypeHandle(ref state);
         }
 
@@ -39,7 +29,7 @@ namespace Flowfield_DOTS
 
             JobHandle createFlowFieldJobHandle;
 
-            //Execute the job for calculating a flowfield - only do it if the goal position has changed over the last frame
+            //Execute the job for calculating a flowfield only if the goal position has changed over the last frame
             if (!_flowField.ValueRW._previousPosition.Equals(_flowField.ValueRW.Goal.Position))
             {
                 CreateFlowFieldJob createFlowField = new CreateFlowFieldJob(_flowField.ValueRW);
@@ -55,18 +45,19 @@ namespace Flowfield_DOTS
 
             state.CompleteDependency();
 
-            //ScheduleParallel causes race conditions
+            //Calculate direction according to the flowfield
             GetDirectionToTargetJob getTargetDirections = new GetDirectionToTargetJob(_flowField.ValueRW);
-            JobHandle moveJobHandle = getTargetDirections.Schedule(state.Dependency);
+            JobHandle moveJobHandle = getTargetDirections.Schedule(state.Dependency); //ScheduleParallel causes race conditions
             moveJobHandle.Complete();
 
+            //Create and get a query containing all flock agents
             EntityQueryBuilder queryBuilder = new EntityQueryBuilder(Allocator.TempJob).WithAll<FlockAgentTagComponent>();
             EntityQuery entityQuery = state.GetEntityQuery(queryBuilder);
-            //state.
 
             _aspectTypeHandle.Update(ref state);
 
-            JobHandle flockingJobHandle = new FlockingJob(SystemAPI.Time.DeltaTime, _aspectTypeHandle).Schedule(entityQuery, moveJobHandle); //.Schedule(state.Dependency);
+            //Apply velocities according to the behavioral model
+            JobHandle flockingJobHandle = new FlockingJob(SystemAPI.Time.DeltaTime, _aspectTypeHandle).Schedule(entityQuery, moveJobHandle);
 
             flockingJobHandle.Complete();
         }

@@ -1,12 +1,12 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace Flowfield_DOTS
 {
+    /// <summary>
+    /// Represents a cell in a flowfield, contains direction and cost values
+    /// </summary>
     public struct Cell : IEquatable<Cell>
     {
         public float3 WorldPosition;
@@ -46,6 +46,9 @@ namespace Flowfield_DOTS
         }
     }
 
+    /// <summary>
+    /// Helper class declaring cardinal directions to be used in a flowfield cell
+    /// </summary>
     public struct GridDirections
     {
         public int2 None;

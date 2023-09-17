@@ -6,7 +6,7 @@ namespace Octree_Bounds
 {
     public class BoundsOctree<T>
     {
-        // The total amount of objects currently in the tree
+    // The total amount of objects currently in the tree
 	public int Count { get; private set; }
 
 	// Root node of the octree

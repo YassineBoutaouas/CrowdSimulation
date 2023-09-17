@@ -1,10 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
 namespace Flowfield_DOTS
 {
+    /// <summary>
+    /// MonoBehavior component containing FlockAgent settings
+    /// </summary>
     public class FlockAgentSettingsAuthoring : MonoBehaviour
     {
         [Header("Acceleration"), Space()]
@@ -34,6 +35,9 @@ namespace Flowfield_DOTS
         }
     }
 
+    /// <summary>
+    /// DOTS component containing settings and values such as avoidance and speed
+    /// </summary>
     public struct FlockAgentSettingsComponent : IComponentData
     {
         public float Speed;
