@@ -1,4 +1,4 @@
-# CrowdSimulation
+# Comparing Realtime Crowd Simulation Approaches
  
 This project compares different realtime crowd simulation approaches. The proposed behavioral model combines pathfinding with  [intrinsic flocking behaviors](https://doi.org/10.1145/37402.37406) (Cohesion, Alignment, Separation)
 
