@@ -461,7 +461,7 @@ Transform:
   m_LocalScale: {x: 200, y: 2, z: 200}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1447972890}
+  m_Father: {fileID: 1000761631}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &364094177
@@ -918,7 +918,7 @@ GameObject:
   - component: {fileID: 809093990}
   - component: {fileID: 809093991}
   m_Layer: 0
-  m_Name: Crowds_OOPSolution
+  m_Name: Crowds_OOP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1015,7 +1015,7 @@ GameObject:
   - component: {fileID: 884131413}
   - component: {fileID: 884131414}
   m_Layer: 0
-  m_Name: Crowds_ShaderSolution
+  m_Name: Crowds_Shader
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1062,7 +1062,7 @@ GameObject:
   m_Component:
   - component: {fileID: 947443643}
   m_Layer: 0
-  m_Name: Flocking_DOTS
+  m_Name: Crowds_DOTS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1113,6 +1113,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1468782791}
+  - {fileID: 1611029614}
+  - {fileID: 364094176}
   - {fileID: 1447972890}
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -1306,14 +1309,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1468782791}
-  - {fileID: 1611029614}
-  - {fileID: 364094176}
-  - {fileID: 884131413}
   - {fileID: 809093990}
   - {fileID: 1857387355}
-  - {fileID: 947443643}
+  - {fileID: 884131413}
   - {fileID: 161488706}
+  - {fileID: 947443643}
   m_Father: {fileID: 1000761631}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1349,7 +1349,7 @@ Transform:
   m_LocalScale: {x: 166.43192, y: 25.60573, z: 2.6103997}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1447972890}
+  m_Father: {fileID: 1000761631}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: -45, z: 0}
 --- !u!114 &1468782792
@@ -1474,7 +1474,7 @@ Transform:
   m_LocalScale: {x: 166.43192, y: 25.60573, z: 2.6103997}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1447972890}
+  m_Father: {fileID: 1000761631}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: -45, z: 0}
 --- !u!114 &1611029615

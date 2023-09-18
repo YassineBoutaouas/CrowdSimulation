@@ -17,9 +17,6 @@ namespace Octree_Points
     //			Nodes have a constant - numObjectsAllowed - which sets the amount of items allowed in a node before it splits.
     // T:		The content of the octree can be anything, since the bounds data is supplied separately.
 
-    // Originally written for my game Scraps (http://www.scrapsgame.com) but intended to be general-purpose.
-    // Copyright 2014 Nition, BSD licence (see LICENCE file). www.momentstudio.co.nz
-    // Unity-based, but could be adapted to work in pure C#
     public class PointOctree
     {
         // The total amount of objects currently in the tree
